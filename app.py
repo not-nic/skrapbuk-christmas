@@ -15,27 +15,22 @@ app.config["DISCORD_BOT_TOKEN"] = os.getenv('SB_BOT_TOKEN')
 
 discord = DiscordOAuth2Session(app)
 
-@app.route("/login/")
+@app.route("/")
 def login():
-    return discord.create_session()
+    return discord.create_session(scope=['identify', 'guilds'])
 
 @app.route("/callback/")
 def callback():
     discord.callback()
-    # return redirect(url_for(".me"))
-    return redirect(location="http://localhost:5173/callback")
+    return redirect(location="http://localhost:5173/profile")
 
 @app.errorhandler(Unauthorized)
 def redirect_unauthorized(e):
-    return redirect(url_for("login"))
+    return redirect(url_for("/"))
 
-@app.route("/")
-def home():
-    return f"Cool"
-
-@app.route("/test")
+@app.route("/time")
 @requires_authorization
-def test():
+def time():
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
     return jsonify({"the_time": f"{current_time}"})
