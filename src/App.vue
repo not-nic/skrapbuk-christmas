@@ -5,48 +5,59 @@ import {defineComponent} from "vue";
 export default defineComponent({
   data() {
     return {
-      data: ""
+      data: "",
+      user: {}
     }
   },
 
   mounted() {
-    const fetchPromise = axios.get("/api/test")
-    fetchPromise.then(response => {
-      this.data = response.data;
+    this.fetchTime()
+    this.getUser()
+  },
 
-      return response.data;
-    }).then(time => {
-      console.log(time);
-    });
+  methods: {
+    async fetchTime() {
+      try {
+        const response = await axios.get("/api/time", {withCredentials: true});
+        let time = response.data.the_time;
+        this.data = time;
+        console.log(time);
+
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+    async getUser() {
+      try {
+        const response = await axios.get("/api/user", {withCredentials: true})
+
+        console.log(response.data)
+        this.user = response.data;
+
+      } catch (error) {
+        console.error(error)
+      }
+    }
   }
 })
 </script>
 
 <template>
   <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+    <img src="./assets/sb.svg" alt="Skrapbuk Logo">
+  </div>
+  <div class="user">
+    <span>{{user}}</span>
   </div>
   <div>
-    {{data}}
+    <p>Time: {{data}}</p>
   </div>
 </template>
 
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+p {
+  font-family: 'Sniglet', cursive;
+  font-size: 18px;
 }
 </style>

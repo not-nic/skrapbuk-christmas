@@ -3,6 +3,8 @@ from datetime import datetime
 from flask import Flask, redirect, url_for, jsonify
 from flask_discord import DiscordOAuth2Session, requires_authorization, Unauthorized
 
+from classes.user import User
+
 app = Flask(__name__)
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "true"
@@ -35,19 +37,21 @@ def time():
     current_time = now.strftime("%H:%M:%S")
     return jsonify({"the_time": f"{current_time}"})
 
-@app.route("/me/")
+@app.route("/user")
 @requires_authorization
-def me():
-    user = discord.fetch_user()
-    return f"""
-    <html>
-        <head>
-            <title>{user.name}</title>
-        </head>
-        <body>
-            <img src='{user.avatar_url}' />
-        </body>
-    </html>"""
+def user_info():
+
+    # get logged in user from flask
+    flask_discord_user = discord.fetch_user()
+
+    # create user with less info as @requires_authorisation does not check scopes.
+    user = User(
+        flask_discord_user.id,
+        flask_discord_user.avatar_url,
+        flask_discord_user.username
+    )
+
+    return user.to_json()
 
 if __name__ == "__main__":
     app.run()
