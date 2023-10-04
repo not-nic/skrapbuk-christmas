@@ -24,6 +24,7 @@ export default defineComponent({
         console.error(error);
       }
     },
+
     async getUser() {
       try {
         const response = await axios.get("/api/user", {withCredentials: true})
@@ -34,6 +35,10 @@ export default defineComponent({
       } catch (error) {
         console.error(error)
       }
+    },
+
+    redirect(route: string) {
+      window.location.href= `http://localhost:8080/${route}`;
     }
   }
 })
@@ -49,11 +54,22 @@ export default defineComponent({
   <div>
     <p>Countdown: {{countdown}}</p>
   </div>
+  <div class="buttons">
+    <button @click="redirect('join')">join</button>
+    <button @click="redirect('start')">start</button>
+    <button @click="redirect('users')">users</button>
+  </div>
 </template>
 
 <style scoped>
 p {
   font-family: 'Sniglet', cursive;
   font-size: 18px;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 </style>
