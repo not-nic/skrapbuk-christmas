@@ -2,10 +2,12 @@ import os
 from datetime import datetime
 from flask import Flask, redirect, url_for, jsonify
 from flask_discord import DiscordOAuth2Session, requires_authorization, Unauthorized
-
-from classes.user import User
+from python.classes.user import User
+from python.config import Config
 
 app = Flask(__name__)
+
+config = Config('D:/Projects/skrapbuk-christmas/python/config.yml')
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "true"
 
@@ -26,21 +28,20 @@ def callback():
     discord.callback()
     return redirect(location="http://localhost:5173/profile")
 
+# TODO: Make this function return the user to the login page from the frontend.
 @app.errorhandler(Unauthorized)
 def redirect_unauthorized(e):
-    return redirect(url_for("/"))
+    print(f"user is unauthorised {e}")
+    return redirect(location="http://localhost:8080/")
 
-@app.route("/time")
+@app.route("/countdown")
 @requires_authorization
 def time():
-    now = datetime.now()
-    current_time = now.strftime("%H:%M:%S")
-    return jsonify({"the_time": f"{current_time}"})
+    return jsonify({"countdown": config.get_countdown()})
 
 @app.route("/user")
 @requires_authorization
 def user_info():
-
     # get logged in user from flask
     flask_discord_user = discord.fetch_user()
 
@@ -48,10 +49,22 @@ def user_info():
     user = User(
         flask_discord_user.id,
         flask_discord_user.avatar_url,
-        flask_discord_user.username
+        flask_discord_user.username,
+        in_server(),
+        is_admin()
     )
 
     return user.to_json()
+
+@requires_authorization
+def in_server() -> bool:
+    # check if user is in the server
+    return any(guild.id == config.find_value('server') for guild in discord.fetch_guilds())
+
+@requires_authorization
+def is_admin() -> bool:
+    # check if user is an admin from config.yml
+    return discord.fetch_user().id in config.get_admins()
 
 if __name__ == "__main__":
     app.run()
