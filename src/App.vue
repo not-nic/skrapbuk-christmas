@@ -5,7 +5,7 @@ import {defineComponent} from "vue";
 export default defineComponent({
   data() {
     return {
-      data: "",
+      countdown: "",
       user: {}
     }
   },
@@ -18,16 +18,12 @@ export default defineComponent({
   methods: {
     async fetchTime() {
       try {
-        const response = await axios.get("/api/time", {withCredentials: true});
-        let time = response.data.the_time;
-        this.data = time;
-        console.log(time);
-
+        const response = await axios.get("/api/countdown", {withCredentials: true});
+        this.countdown = response.data.countdown;
       } catch (error) {
         console.error(error);
       }
     },
-
     async getUser() {
       try {
         const response = await axios.get("/api/user", {withCredentials: true})
@@ -51,7 +47,7 @@ export default defineComponent({
     <span>{{user}}</span>
   </div>
   <div>
-    <p>Time: {{data}}</p>
+    <p>Countdown: {{countdown}}</p>
   </div>
 </template>
 
