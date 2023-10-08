@@ -1,9 +1,16 @@
 import json
-from python.config import Config
 
-config = Config('D:/Projects/skrapbuk-christmas/python/config.yml')
+from app import database
+from sqlalchemy import Column, Boolean, Integer, String
 
-class User:
+class User(database.Model):
+    id = Column(Integer, primary_key=True)
+    snowflake = Column(String(255))
+    avatar_url = Column(String(255))
+    username = Column(String(255))
+    in_server = Column(Boolean)
+    is_admin = Column(Boolean)
+
     def __init__(self, snowflake, avatar_url, username, in_server, is_admin):
         self.snowflake = snowflake
         self.avatar_url = avatar_url
@@ -11,6 +18,15 @@ class User:
         self.in_server = in_server
         self.is_admin = is_admin
 
-    def to_json(self):
-        return json.dumps(self.__dict__)
+    def __str__(self):
+        return f"{self.snowflake} - {self.username}"
 
+    def to_json(self):
+        user_json = {
+            'snowflake': self.snowflake,
+            'avatar_url': self.avatar_url,
+            'username': self.username,
+            'in_server': self.in_server,
+            'is_admin': self.is_admin
+        }
+        return json.dumps(user_json)
