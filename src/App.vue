@@ -5,7 +5,7 @@ import {defineComponent} from "vue";
 export default defineComponent({
   data() {
     return {
-      data: "",
+      countdown: "",
       user: {}
     }
   },
@@ -18,11 +18,8 @@ export default defineComponent({
   methods: {
     async fetchTime() {
       try {
-        const response = await axios.get("/api/time", {withCredentials: true});
-        let time = response.data.the_time;
-        this.data = time;
-        console.log(time);
-
+        const response = await axios.get("/api/countdown", {withCredentials: true});
+        this.countdown = response.data.countdown;
       } catch (error) {
         console.error(error);
       }
@@ -38,6 +35,10 @@ export default defineComponent({
       } catch (error) {
         console.error(error)
       }
+    },
+
+    redirect(route: string) {
+      window.location.href= `http://localhost:8080/${route}`;
     }
   }
 })
@@ -51,7 +52,12 @@ export default defineComponent({
     <span>{{user}}</span>
   </div>
   <div>
-    <p>Time: {{data}}</p>
+    <p>Countdown: {{countdown}}</p>
+  </div>
+  <div class="buttons">
+    <button @click="redirect('join')">join</button>
+    <button @click="redirect('start')">start</button>
+    <button @click="redirect('users')">users</button>
   </div>
 </template>
 
@@ -59,5 +65,11 @@ export default defineComponent({
 p {
   font-family: 'Sniglet', cursive;
   font-size: 18px;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 </style>
