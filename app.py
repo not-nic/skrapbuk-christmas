@@ -1,13 +1,16 @@
 import os
-from flask import Flask, redirect, jsonify
+from flask import Flask, redirect, jsonify, request
 from flask_discord import DiscordOAuth2Session, requires_authorization, Unauthorized
 from python.database import database
 from python.classes.user import User
+from python.classes.logging import Logging
 from python.config import Config
 
 app = Flask(__name__)
 
-config = Config('D:/Projects/skrapbuk-christmas/python/config.yml')
+logger = Logging()
+config = Config('D:/Projects/skrapbuk-christmas/python/config.yml', logger)
+logger.start_processing_thread()
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "true"
 app.config["SECRET_KEY"] = os.urandom(24)
@@ -36,12 +39,18 @@ def callback():
 @app.errorhandler(Unauthorized)
 def redirect_unauthorized(e):
     # TODO: Make this function return the user to the login page from the frontend.
-    print(f"user is unauthorised {e}")
+    ip_address = request.remote_addr
+    endpoint = request.endpoint
+    logger.queue_message(
+        f"{ip_address} tried to access /{endpoint} but is currently unauthorised.",
+        'ERROR'
+    )
+
     return redirect(location="http://localhost:8080/")
 
 @app.route("/countdown")
 @requires_authorization
-def time():
+def countdown():
     return jsonify({"countdown": config.get_countdown()})
 
 @app.route("/user")
@@ -95,7 +104,10 @@ def join():
     database.session.add_all([sample_user1, sample_user2, sample_user3])
     database.session.commit()
 
-    print(f"User '{flask_discord_user.username}' with ID '{flask_discord_user.id}' has been added to the database.")
+    logger.queue_message(
+        f"User {flask_discord_user.username} ({flask_discord_user.id}) has been added to the database.",
+        'INFO'
+    )
 
     return "Joined Skrapbuk Christmas"
 

@@ -3,12 +3,13 @@ import time
 
 from functools import wraps
 from flask_discord import DiscordOAuth2Session
-
-skrapbuk_start_time = 1703462399
+from flask import abort, request
+from python.classes.logging import Logging
 
 class Config:
-    def __init__(self, file_path):
+    def __init__(self, file_path, logger):
         self.file_path = file_path
+        self.logger = logger
 
         with open(self.file_path, 'r') as  file:
             self.config = yaml.safe_load(file)
@@ -21,7 +22,7 @@ class Config:
 
     def get_countdown(self):
         current_time = int(time.time())
-        time_difference = max(skrapbuk_start_time - current_time, 0)
+        time_difference = max(self.find_value('start_time') - current_time, 0)
 
         days = time_difference // (24 * 3600)
         time_difference %= (24 * 3600)
@@ -39,5 +40,11 @@ class Config:
             if discord.fetch_user().id in self.get_admins():
                 return func(*args, **kwargs)
             else:
-                return "Unauthorised: Only admins can access this function."
+                self.logger.queue_message(
+                    message=f"{discord.fetch_user().username} ({discord.fetch_user().id}) can't view /{request.endpoint}, "
+                            f"only admins can access this function.",
+                    message_type="INFO"
+                )
+
+                return abort(code=401)
         return wrapper
