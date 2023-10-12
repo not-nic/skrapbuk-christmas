@@ -1,17 +1,12 @@
 import os
 from flask import Flask, redirect, jsonify, request
 from flask_discord import DiscordOAuth2Session, requires_authorization, Unauthorized
-from python.database import database
-from python.classes.user import User
-from python.classes.logging import Logging
 from python.config import Config
+from python.classes.database import Database
+from python.classes.logging import Logging
+from python.classes.user import User
 
 app = Flask(__name__)
-
-logger = Logging()
-config = Config('D:/Projects/skrapbuk-christmas/python/config.yml', logger)
-logger.start_processing_thread()
-
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "true"
 app.config["SECRET_KEY"] = os.urandom(24)
 app.config["DISCORD_CLIENT_ID"] = os.getenv('SB_CLIENT_ID')
@@ -22,10 +17,12 @@ app.config["SQLALCHEMY_DATABASE_URI"] = 'mysql://nic:password@localhost:3306/skr
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 discord = DiscordOAuth2Session(app)
-database.init_app(app)
-# create user table on flask startup.
-with app.app_context():
-    database.create_all()
+logger = Logging()
+config = Config('D:/Projects/skrapbuk-christmas/python/config.yml', logger)
+logger.start_processing_thread()
+
+database = Database(app)
+# database.seed_data(10)
 
 @app.route("/")
 def login():
