@@ -92,14 +92,7 @@ def join():
         is_admin()
     )
 
-    database.session.add(new_user)
-
-    # - add dummy data along with user - #
-    sample_user1 = User(snowflake='123', avatar_url='avatar1.jpg', username='user1', in_server=True, is_admin=True)
-    sample_user2 = User(snowflake='456', avatar_url='avatar2.jpg', username='user2', in_server=True, is_admin=False)
-    sample_user3 = User(snowflake='789', avatar_url='avatar3.jpg', username='user3', in_server=True, is_admin=False)
-    database.session.add_all([sample_user1, sample_user2, sample_user3])
-    database.session.commit()
+    database.add_user(new_user)
 
     logger.queue_message(
         f"User {flask_discord_user.username} ({flask_discord_user.id}) has been added to the database.",
@@ -119,8 +112,7 @@ def start():
 @requires_authorization
 @config.is_admin
 def all_users():
-    total_users = len(User.query.all())
-    return f"There are {total_users} users signed up."
+    return database.get_all_users()
 
 if __name__ == "__main__":
     app.run()
