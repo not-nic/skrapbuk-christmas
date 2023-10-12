@@ -1,7 +1,7 @@
 import json
 
-from app import database
 from sqlalchemy import Column, Boolean, Integer, String
+from python.classes.database import database
 
 class User(database.Model):
     id = Column(Integer, primary_key=True)
@@ -19,7 +19,7 @@ class User(database.Model):
         self.is_admin = is_admin
 
     def __str__(self):
-        return f"{self.snowflake} - {self.username}"
+        return f"{self.snowflake} ({self.username})"
 
     def to_json(self):
         user_json = {
@@ -29,4 +29,4 @@ class User(database.Model):
             'in_server': self.in_server,
             'is_admin': self.is_admin
         }
-        return json.dumps(user_json)
+        return user_json

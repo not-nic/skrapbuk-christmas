@@ -4,7 +4,6 @@ import time
 from functools import wraps
 from flask_discord import DiscordOAuth2Session
 from flask import abort, request
-from python.classes.logging import Logging
 
 class Config:
     def __init__(self, file_path, logger):
