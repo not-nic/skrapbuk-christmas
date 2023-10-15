@@ -2,8 +2,10 @@ import random, string
 
 from flask_sqlalchemy import SQLAlchemy
 database = SQLAlchemy()
+
 from python.classes.user import User
 from python.classes.logging import Logging
+from python.classes.ban_list import BanList
 
 logger = Logging()
 
@@ -70,5 +72,52 @@ class Database:
         If the user is an admin, get all current signed-up users.
         :return: A json object of the signed-up users.
         """
-        users = User.query.all()
-        return [user.to_json() for user in users]
+        with self.app.app_context():
+            users = User.query.all()
+            return [user.to_json() for user in users]
+
+    def get_user_by_snowflake(self, snowflake):
+        """
+        get a user by their snowflake.
+        :param snowflake: discord id/snowflake.
+        :return the user object.
+        """
+        with self.app.app_context():
+            return User.query.get(snowflake=snowflake)
+
+    def ban_user(self, snowflake, reason):
+        """
+        Ban a toxic user by adding their id to a ban_list table and adding an is_banned flag to their
+        database entry.
+        :param snowflake: Discord snowflake ID.
+        :param reason: a reason for the ban.
+        :return: A message informing that the user has either been banned or not found.
+        """
+        banned_user = User.query.filter_by(snowflake=snowflake).first()
+        banned_user_snowflake = banned_user.snowflake
+
+        if reason is None:
+            reason = "No Reason"
+
+        # check if the user exists
+        if banned_user:
+
+            # check if the user is already banned
+            existing_ban = BanList.query.filter_by(user_snowflake=snowflake).first()
+            if existing_ban:
+                return f'User ({snowflake}) is already banned.'
+
+            # user not already banned, ban the user.
+            banned_user.is_banned = True
+            ban_entry = BanList(
+                user_snowflake=banned_user_snowflake,
+                reason=reason,
+                banned_user=banned_user
+            )
+
+            self.get_session().add(ban_entry)
+            self.get_session().commit()
+
+            return f'User ({snowflake}) has been banned.'
+        else:
+            return f'User ({snowflake}) not found.'
