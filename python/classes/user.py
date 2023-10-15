@@ -1,5 +1,3 @@
-import json
-
 from sqlalchemy import Column, Boolean, Integer, String
 from python.classes.database import database
 
@@ -10,6 +8,7 @@ class User(database.Model):
     username = Column(String(255))
     in_server = Column(Boolean)
     is_admin = Column(Boolean)
+    is_banned = Column(Boolean, default=False)
 
     def __init__(self, snowflake, avatar_url, username, in_server, is_admin):
         self.snowflake = snowflake

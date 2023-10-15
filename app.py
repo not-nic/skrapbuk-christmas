@@ -1,10 +1,10 @@
 import os
 from flask import Flask, redirect, jsonify, request
 from flask_discord import DiscordOAuth2Session, requires_authorization, Unauthorized
-from python.config import Config
 from python.classes.database import Database
 from python.classes.logging import Logging
 from python.classes.user import User
+from python.config import Config
 
 app = Flask(__name__)
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "true"
@@ -47,11 +47,13 @@ def redirect_unauthorized(e):
 
 @app.route("/countdown")
 @requires_authorization
+@config.is_banned
 def countdown():
     return jsonify({"countdown": config.get_countdown()})
 
 @app.route("/user")
 @requires_authorization
+@config.is_banned
 def user_info():
     # get logged in user from flask
     flask_discord_user = discord.fetch_user()
@@ -113,6 +115,13 @@ def start():
 @config.is_admin
 def all_users():
     return database.get_all_users()
+
+@app.route("/block/<string:snowflake>", methods=['GET'])
+@requires_authorization
+@config.is_admin
+def block(snowflake):
+    reason = request.args.get('reason')
+    return database.ban_user(snowflake, reason)
 
 if __name__ == "__main__":
     app.run()
