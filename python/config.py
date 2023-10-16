@@ -4,7 +4,7 @@ import time
 from functools import wraps
 from flask_discord import DiscordOAuth2Session
 from flask import abort, request
-from python.classes.logging import Logging
+from python.classes.ban_list import BanList
 
 class Config:
     def __init__(self, file_path, logger):
@@ -35,7 +35,7 @@ class Config:
 
     def is_admin(self, func):
         @wraps(func)
-        def wrapper(*args, **kwargs):#
+        def wrapper(*args, **kwargs):
             discord = DiscordOAuth2Session()
             if discord.fetch_user().id in self.get_admins():
                 return func(*args, **kwargs)
@@ -47,4 +47,22 @@ class Config:
                 )
 
                 return abort(code=401)
+        return wrapper
+
+    def is_banned(self, func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            discord = DiscordOAuth2Session()
+            banned_user = BanList.query.filter_by(user_snowflake=discord.fetch_user().id).first()
+
+            if not banned_user:
+               return func(*args, **kwargs)
+            else:
+                self.logger.queue_message(
+                    message=f"{discord.fetch_user().username} ({discord.fetch_user().id}) can't view /{request.endpoint}, "
+                            f"because they are banned.",
+                    message_type="INFO"
+                )
+                return f"You are banned, you cannot take part in Skrapbuk."
+
         return wrapper

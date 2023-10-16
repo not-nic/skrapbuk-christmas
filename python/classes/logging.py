@@ -42,6 +42,14 @@ class Logging:
         """
         return f"{Text.CYAN}{Text.BOLD}[{self.formatted_time()} INFO]: {Text.END}{message}"
 
+    def created_message(self, message):
+        """
+        Format an CREATED log message with a timestamp.
+        Args: message (str): The message to be logged.
+        Returns: formatted log message. (str)
+        """
+        return f"{Text.YELLOW}{Text.BOLD}[{self.formatted_time()} CREATED]: {Text.END}{message}"
+
     def error_message(self, message):
         """
         Format an ERROR log message with a timestamp.
@@ -61,6 +69,8 @@ class Logging:
             response_message = self.info_message(message)
         elif message_type == 'ERROR':
             response_message = self.error_message(message)
+        elif message_type == 'CREATED':
+            response_message = self.created_message(message)
         self.response_queue.put(response_message)
 
     def process_queue(self):

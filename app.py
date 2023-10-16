@@ -1,17 +1,12 @@
 import os
 from flask import Flask, redirect, jsonify, request
 from flask_discord import DiscordOAuth2Session, requires_authorization, Unauthorized
-from python.database import database
-from python.classes.user import User
+from python.classes.database import Database
 from python.classes.logging import Logging
+from python.classes.user import User
 from python.config import Config
 
 app = Flask(__name__)
-
-logger = Logging()
-config = Config('D:/Projects/skrapbuk-christmas/python/config.yml', logger)
-logger.start_processing_thread()
-
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "true"
 app.config["SECRET_KEY"] = os.urandom(24)
 app.config["DISCORD_CLIENT_ID"] = os.getenv('SB_CLIENT_ID')
@@ -22,10 +17,12 @@ app.config["SQLALCHEMY_DATABASE_URI"] = 'mysql://nic:password@localhost:3306/skr
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 discord = DiscordOAuth2Session(app)
-database.init_app(app)
-# create user table on flask startup.
-with app.app_context():
-    database.create_all()
+logger = Logging()
+config = Config('D:/Projects/skrapbuk-christmas/python/config.yml', logger)
+logger.start_processing_thread()
+
+database = Database(app)
+# database.seed_data(10)
 
 @app.route("/")
 def login():
@@ -50,11 +47,13 @@ def redirect_unauthorized(e):
 
 @app.route("/countdown")
 @requires_authorization
+@config.is_banned
 def countdown():
     return jsonify({"countdown": config.get_countdown()})
 
 @app.route("/user")
 @requires_authorization
+@config.is_banned
 def user_info():
     # get logged in user from flask
     flask_discord_user = discord.fetch_user()
@@ -95,14 +94,7 @@ def join():
         is_admin()
     )
 
-    database.session.add(new_user)
-
-    # - add dummy data along with user - #
-    sample_user1 = User(snowflake='123', avatar_url='avatar1.jpg', username='user1', in_server=True, is_admin=True)
-    sample_user2 = User(snowflake='456', avatar_url='avatar2.jpg', username='user2', in_server=True, is_admin=False)
-    sample_user3 = User(snowflake='789', avatar_url='avatar3.jpg', username='user3', in_server=True, is_admin=False)
-    database.session.add_all([sample_user1, sample_user2, sample_user3])
-    database.session.commit()
+    database.add_user(new_user)
 
     logger.queue_message(
         f"User {flask_discord_user.username} ({flask_discord_user.id}) has been added to the database.",
@@ -122,8 +114,14 @@ def start():
 @requires_authorization
 @config.is_admin
 def all_users():
-    total_users = len(User.query.all())
-    return f"There are {total_users} users signed up."
+    return database.get_all_users()
+
+@app.route("/block/<string:snowflake>", methods=['GET'])
+@requires_authorization
+@config.is_admin
+def block(snowflake):
+    reason = request.args.get('reason')
+    return database.ban_user(snowflake, reason)
 
 if __name__ == "__main__":
     app.run()
