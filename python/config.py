@@ -4,7 +4,7 @@ import time
 from functools import wraps
 from flask_discord import DiscordOAuth2Session
 from flask import abort, request
-from python.classes.ban_list import BanList
+from python.classes.models.ban_list import BanList
 
 class Config:
     def __init__(self, file_path, logger):

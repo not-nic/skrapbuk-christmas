@@ -3,9 +3,9 @@ import random, string
 from flask_sqlalchemy import SQLAlchemy
 database = SQLAlchemy()
 
-from python.classes.user import User
+from python.classes.models.user import User
 from python.classes.logging import Logging
-from python.classes.ban_list import BanList
+from python.classes.models.ban_list import BanList
 
 logger = Logging()
 
@@ -65,7 +65,8 @@ class Database:
             self.db.session.commit()
 
             # add notification message to the log.
-            logger.queue_message(f"Created and inserted {seed_amount} dummy users to the database.", 'CREATED')
+            logger.queue_message(f"Created and inserted {seed_amount} dummy users to the database.",
+                                 'CREATED')
 
     def get_all_users(self):
         """
@@ -91,7 +92,7 @@ class Database:
         database entry.
         :param snowflake: Discord snowflake ID.
         :param reason: a reason for the ban.
-        :return: A message informing that the user has either been banned or not found.
+        :return: (str) A message informing that the user has either been banned or not found.
         """
         banned_user = User.query.filter_by(snowflake=snowflake).first()
         banned_user_snowflake = banned_user.snowflake
