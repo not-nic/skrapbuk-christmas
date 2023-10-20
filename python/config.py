@@ -11,11 +11,27 @@ class Config:
         self.file_path = file_path
         self.logger = logger
 
-        with open(self.file_path, 'r') as  file:
+        with open(self.file_path, 'r') as file:
             self.config = yaml.safe_load(file)
+
+    def save_config(self):
+        """
+        Write changes & make updates to the config file.
+        """
+        with open(self.file_path, 'w') as file:
+            yaml.dump(self.config, file)
 
     def find_value(self, key):
         return self.config.get('discord', {}).get(key, None)
+
+    def update_value(self, key, new_value):
+        """
+        Update a value under the 'discord' property of config.yml.
+        :param key: of the value to be updated.
+        :param new_value: value to replace the one specified in the config.
+        """
+        self.config['discord'][key] = new_value
+        self.save_config()
 
     def get_admins(self):
         return list(self.config.get('discord', {}).get('admins', {}).values())
