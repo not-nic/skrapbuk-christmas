@@ -3,7 +3,7 @@ from python.classes.database import database
 
 class User(database.Model):
     id = Column(Integer, primary_key=True)
-    snowflake = Column(String(255))
+    snowflake = Column(String(255), index=True)
     avatar_url = Column(String(255))
     username = Column(String(255))
     partner = Column(String(255), ForeignKey('user.snowflake'), nullable=True, default=None)
