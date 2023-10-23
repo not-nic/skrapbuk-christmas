@@ -28,7 +28,7 @@ def user_info():
         flask_discord_user.avatar_url,
         flask_discord_user.username,
         in_server(),
-        is_admin()
+        is_admin(),
     )
 
     return user.to_json()
@@ -37,16 +37,22 @@ def user_info():
 @requires_authorization
 @config.is_banned
 def join():
+
+    # check if user has already joined event
+    has_joined = User.query.filter_by(snowflake=discord.fetch_user().id).first()
+    if has_joined:
+        return "You have already joined skrapbuk, you can't join again 😩"
+
     # get logged in user from flask
     flask_discord_user = discord.fetch_user()
 
     # create user with less info as @requires_authorisation does not check scopes.
     new_user = User(
-        flask_discord_user.id,
-        flask_discord_user.avatar_url,
-        flask_discord_user.username,
-        in_server(),
-        is_admin()
+        snowflake=flask_discord_user.id,
+        avatar_url=flask_discord_user.avatar_url,
+        username=flask_discord_user.username,
+        in_server=in_server(),
+        is_admin=is_admin()
     )
 
     database.add_user(new_user)
