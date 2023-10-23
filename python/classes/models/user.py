@@ -1,11 +1,12 @@
-from sqlalchemy import Column, Boolean, Integer, String
+from sqlalchemy import Column, Boolean, Integer, String, ForeignKey
 from python.classes.database import database
 
 class User(database.Model):
     id = Column(Integer, primary_key=True)
-    snowflake = Column(String(255))
+    snowflake = Column(String(255), index=True)
     avatar_url = Column(String(255))
     username = Column(String(255))
+    partner = Column(String(255), ForeignKey('user.snowflake'), nullable=True, default=None)
     in_server = Column(Boolean)
     is_admin = Column(Boolean)
     is_banned = Column(Boolean, default=False)
@@ -25,7 +26,9 @@ class User(database.Model):
             'snowflake': self.snowflake,
             'avatar_url': self.avatar_url,
             'username': self.username,
+            'partner': self.partner,
             'in_server': self.in_server,
-            'is_admin': self.is_admin
+            'is_admin': self.is_admin,
+            'is_banned' : self.is_banned
         }
         return user_json

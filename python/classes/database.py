@@ -3,9 +3,9 @@ import random, string
 from flask_sqlalchemy import SQLAlchemy
 database = SQLAlchemy()
 
-from python.classes.user import User
+from python.classes.models.user import User
 from python.classes.logging import Logging
-from python.classes.ban_list import BanList
+from python.classes.models.ban_list import BanList
 
 logger = Logging()
 
@@ -30,7 +30,8 @@ class Database:
         wrapper function to add a user to the database.
         :param user: the user object to be added.
         """
-        self.db.session.add(user)
+        self.get_session().add(user)
+        self.get_session().commit()
 
     def seed_data(self, seed_amount):
         """
@@ -61,11 +62,12 @@ class Database:
                 # Debug Print: print(f"Random User: {random_name} ({random_snowflake}) {random_avatar}")
 
             # add and commit users to the database session.
-            self.db.session.add_all(generated_users)
-            self.db.session.commit()
+            self.get_session().add_all(generated_users)
+            self.get_session().commit()
 
             # add notification message to the log.
-            logger.queue_message(f"Created and inserted {seed_amount} dummy users to the database.", 'CREATED')
+            logger.queue_message(f"Created and inserted {seed_amount} dummy users to the database.",
+                                 'CREATED')
 
     def get_all_users(self):
         """
@@ -76,22 +78,13 @@ class Database:
             users = User.query.all()
             return [user.to_json() for user in users]
 
-    def get_user_by_snowflake(self, snowflake):
-        """
-        get a user by their snowflake.
-        :param snowflake: discord id/snowflake.
-        :return the user object.
-        """
-        with self.app.app_context():
-            return User.query.get(snowflake=snowflake)
-
     def ban_user(self, snowflake, reason):
         """
         Ban a toxic user by adding their id to a ban_list table and adding an is_banned flag to their
         database entry.
         :param snowflake: Discord snowflake ID.
         :param reason: a reason for the ban.
-        :return: A message informing that the user has either been banned or not found.
+        :return: (str) A message informing that the user has either been banned or not found.
         """
         banned_user = User.query.filter_by(snowflake=snowflake).first()
         banned_user_snowflake = banned_user.snowflake
@@ -121,3 +114,60 @@ class Database:
             return f'User ({snowflake}) has been banned.'
         else:
             return f'User ({snowflake}) not found.'
+
+    def unban_user(self, snowflake):
+        """
+        Unban a user from their snowflake
+        :param snowflake: id of the user to be unbanned.
+        :return: (str) A message informing the user has been unbanned, or not found.
+        """
+        banned_user = User.query.filter_by(snowflake=snowflake).first()
+
+        # check if the user exists
+        if banned_user:
+
+            # set banned flag to false
+            banned_user_snowflake = banned_user.snowflake
+            banned_user.is_banned = False
+
+            ban_list_entry = BanList.query.filter_by(user_snowflake=banned_user_snowflake).first()
+            # if user is found in the ban list, remove them
+            if ban_list_entry:
+                self.get_session().delete(ban_list_entry)
+                self.get_session().commit()
+                return f"User ({banned_user_snowflake}) has been unbanned."
+            else:
+                return f"User ({banned_user.snowflake}) is not banned."
+        else:
+            return f"User ({banned_user.snowflake}) not found."
+
+    def pair_users(self):
+        """
+        pair all the users that have signed up to the skrapbuk event, by giving them a partner.
+        :return: (dict) dictionary of all users and their partner.
+        """
+        # get all unbanned users & shuffle them.
+        users = User.query.filter(User.is_banned == False).all()
+        random.shuffle(users)
+
+        num_users = len(users)
+
+        logger.queue_message(f"Starting to pair users", 'INFO')
+
+        # iterate over all users
+        for i in range(num_users):
+
+            # calculate the index of the 'partner' creating a pseudo-circular linked list
+            partner = (i + 1) % num_users
+            # assign the partner to the current user
+            users[i].partner = users[partner].snowflake
+
+            self.get_session().commit()
+
+            logger.queue_message(f"{users[i].username} ({users[i].snowflake}) -> "
+                                 f"{users[partner].username} ({users[partner].snowflake})", 'INFO')
+
+        logger.queue_message(f"Finished pairing users.", 'INFO')
+
+
+
