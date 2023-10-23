@@ -30,7 +30,8 @@ class Database:
         wrapper function to add a user to the database.
         :param user: the user object to be added.
         """
-        self.db.session.add(user)
+        self.get_session().add(user)
+        self.get_session().commit()
 
     def seed_data(self, seed_amount):
         """
@@ -61,8 +62,8 @@ class Database:
                 # Debug Print: print(f"Random User: {random_name} ({random_snowflake}) {random_avatar}")
 
             # add and commit users to the database session.
-            self.db.session.add_all(generated_users)
-            self.db.session.commit()
+            self.get_session().add_all(generated_users)
+            self.get_session().commit()
 
             # add notification message to the log.
             logger.queue_message(f"Created and inserted {seed_amount} dummy users to the database.",
@@ -158,7 +159,7 @@ class Database:
 
             # calculate the index of the 'partner' creating a pseudo-circular linked list
             partner = (i + 1) % num_users
-            # assign a partner to the current user
+            # assign the partner to the current user
             users[i].partner = users[partner].snowflake
 
             self.get_session().commit()
