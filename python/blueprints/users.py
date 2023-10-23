@@ -69,3 +69,14 @@ def join():
 @config.is_admin
 def all_users():
     return database.get_all_users()
+
+@users.route("/partner", methods=['GET'])
+@requires_authorization
+@config.has_partner
+def partner_info():
+    # TODO: Return partner info as json including their questions.
+    snowflake = discord.fetch_user().id
+    username = discord.fetch_user().username
+    partner_snowflake = User.query.filter_by(snowflake=snowflake).first().partner
+    partner_username =  User.query.filter_by(snowflake=partner_snowflake).first().username
+    return f"{username} your partner is {partner_username}."
