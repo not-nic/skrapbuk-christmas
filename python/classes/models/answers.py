@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text, ForeignKey
 from python.classes.database import database
-class Question(database.Model):
+class Answers(database.Model):
     id = Column(Integer, primary_key=True)
     user_snowflake = Column(String(255), ForeignKey('user.snowflake'))
     fav_game = Column(Text)
@@ -20,7 +20,7 @@ class Question(database.Model):
         self.hobby_interest = hobby_interest
 
     def __str__(self):
-        return (f"User snowflake questions:\n"
+        return (f"User snowflake answers:\n"
                 f"Favourite Game: {self.fav_game}\n"
                 f"Favourite Colour: {self.fav_colour}\n"
                 f"Favourite Song: {self.fav_song}\n"
