@@ -6,6 +6,7 @@ from flask_discord import DiscordOAuth2Session
 from flask import abort, request
 from python.classes.models.user import User
 from python.classes.models.ban_list import BanList
+from python.classes.models.answers import Answers
 
 class Config:
     def __init__(self, file_path, logger):
@@ -119,7 +120,7 @@ class Config:
         Decorator Function to check if a user has been assigned a partner.
         Returns:
             (nothing) continues with the function if the user has a partner.
-            (abort) 403: User is forbidden from viewing content.
+            (abort) 403: User is forbidden from viewing content as they do not have a partner.
         """
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -138,3 +139,32 @@ class Config:
                 return abort(code=403, description=f"User ({snowflake}) does not have a partner.")
 
         return wrapper
+
+    def created_answers(self, func):
+        """
+        Decorator function to check if a user has filled out their questions before trying to join skrapbuk.
+        Returns:
+            (nothing) continues with the function if the user has a partner.
+            (abort) 403: Prompt user to fill out questions, before allowing them to join skrapbuk.
+        """
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            discord = DiscordOAuth2Session()
+            snowflake = discord.fetch_user().id
+            username = discord.fetch_user().username
+            user_answers = Answers.query.filter_by(user_snowflake=snowflake).first()
+
+            # check if user answers exist.
+            if user_answers:
+                return func(*args, **kwargs)
+            else:
+                self.logger.queue_message(
+                    message=f"{discord.fetch_user().username} ({discord.fetch_user().id}) has not answered questions.",
+                    message_type="INFO"
+                )
+                return abort(code=403, description=f"{username} ({snowflake}) you have not answered the questions."
+                                                   f" Please answer all questions to join skrapbuk!")
+
+        return wrapper
+
+
