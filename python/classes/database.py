@@ -1,6 +1,7 @@
 import random, string
 
 from flask_sqlalchemy import SQLAlchemy
+from flask import jsonify
 database = SQLAlchemy()
 
 from python.classes.models.user import User
@@ -20,8 +21,9 @@ class Database:
 
     def get_session(self):
         """
-        function to return the current 'shared' database session.
-        :return: current database session
+        function to return the current database session.
+        Returns:
+             Current database session.
         """
         return self.db.session
 
@@ -71,8 +73,9 @@ class Database:
 
     def get_all_users(self):
         """
-        If the user is an admin, get all current signed-up users.
-        :return: A json object of the signed-up users.
+        Get all signed-up users from user table.
+        Returns:
+            (json) list of users as json objects.
         """
         with self.app.app_context():
             users = User.query.all()
@@ -84,7 +87,8 @@ class Database:
         database entry.
         :param snowflake: Discord snowflake ID.
         :param reason: a reason for the ban.
-        :return: (str) A message informing that the user has either been banned or not found.
+        Returns:
+            (json) A message informing that the user has either been banned or not found.
         """
         banned_user = User.query.filter_by(snowflake=snowflake).first()
         banned_user_snowflake = banned_user.snowflake
@@ -98,7 +102,8 @@ class Database:
             # check if the user is already banned
             existing_ban = BanList.query.filter_by(user_snowflake=snowflake).first()
             if existing_ban:
-                return f'User ({snowflake}) is already banned.'
+                return jsonify({"message": f"User ({snowflake}) is already banned."}), 200
+
 
             # user not already banned, ban the user.
             banned_user.is_banned = True
@@ -111,15 +116,16 @@ class Database:
             self.get_session().add(ban_entry)
             self.get_session().commit()
 
-            return f'User ({snowflake}) has been banned.'
+            return jsonify({"message": f"User ({snowflake}) has been banned."}), 200
         else:
-            return f'User ({snowflake}) not found.'
+            return jsonify({"error": f"User ({snowflake}) not found."}), 400
 
     def unban_user(self, snowflake):
         """
         Unban a user from their snowflake
         :param snowflake: id of the user to be unbanned.
-        :return: (str) A message informing the user has been unbanned, or not found.
+        Returns:
+            (json) A message informing the user has been unbanned, or not found.
         """
         banned_user = User.query.filter_by(snowflake=snowflake).first()
 
@@ -135,16 +141,15 @@ class Database:
             if ban_list_entry:
                 self.get_session().delete(ban_list_entry)
                 self.get_session().commit()
-                return f"User ({banned_user_snowflake}) has been unbanned."
+                return jsonify({"message": f"User ({snowflake}) has been unbanned."}), 200
             else:
-                return f"User ({banned_user.snowflake}) is not banned."
+                return jsonify({"message": f"User ({snowflake}) is not banned."}), 200
         else:
-            return f"User ({banned_user.snowflake}) not found."
+            return jsonify({"error": f"User ({snowflake}) not found."}), 400
 
     def pair_users(self):
         """
-        pair all the users that have signed up to the skrapbuk event, by giving them a partner.
-        :return: (dict) dictionary of all users and their partner.
+        'pair' all the users that have signed up to the skrapbuk event, by randomly assigning them a 'partner'.
         """
         # get all unbanned users & shuffle them.
         users = User.query.filter(User.is_banned == False).all()
