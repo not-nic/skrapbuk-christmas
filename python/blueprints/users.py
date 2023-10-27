@@ -1,8 +1,11 @@
+import os
+
+from datetime import datetime
 from flask import Blueprint, request, jsonify
 from flask_discord import requires_authorization
 from python.classes.models.user import User
 from python.classes.models.answers import Answers
-from app import database, config, discord, logger
+from app import app, database, config, discord, logger
 
 users = Blueprint('users_blueprint', __name__, url_prefix='/users')
 
@@ -188,6 +191,42 @@ def user_partner():
         "partner" : partner_info,
         "answers" : get_answers(partner_snowflake)
     })
+
+@users.route("/upload", methods=['POST'])
+@requires_authorization
+@config.is_banned
+@config.has_partner
+def upload_artwork():
+
+    if 'image' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
+    file = request.files["image"]
+    original_filename = file.filename
+
+    if original_filename == "":
+        return jsonify({"error": "No file selected."}), 400
+
+    if file and accepted_image_format(original_filename):
+        new_filename = f"{discord.fetch_user().id}_{generate_filename_timestamp(original_filename)}"
+
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], new_filename)
+        print(filepath)
+        file.save(filepath)
+        return jsonify({"message": "File Uploaded Successfully."}), 200
+    else:
+        extension = original_filename.rsplit(".", 1)[-1]
+        print(f"'{extension}' is not a valid extension, Only use .png, .jpg, .jpeg, .gif!")
+        return jsonify({"error": f"'{extension}' is not a valid extension, Only use .png, .jpg, .jpeg, .gif!"}), 400
+
+def generate_filename_timestamp(filename):
+    timestamp = datetime.now().strftime('%d%m%Y%H%M%S')
+    file_extension = os.path.splitext(filename)
+    return f'{timestamp}{file_extension[1]}'
+
+def accepted_image_format(filename):
+    allowed_formats = {"png", "jpg", "jpeg", "gif"}
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in allowed_formats
 
 @users.route("/all", methods=['GET'])
 @requires_authorization
