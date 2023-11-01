@@ -1,5 +1,6 @@
 import random, string
 
+from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from flask import jsonify
 database = SQLAlchemy()
@@ -7,6 +8,7 @@ database = SQLAlchemy()
 from python.classes.models.user import User
 from python.classes.logging import Logging
 from python.classes.models.ban_list import BanList
+from python.classes.models.artwork import Artwork
 
 logger = Logging()
 
@@ -174,5 +176,22 @@ class Database:
 
         logger.queue_message(f"Finished pairing users.", 'INFO')
 
+    def create_artwork_entry(self, user, filename):
+        """
+        Function to add new artwork entry to artwork database table.
+        :param user: the user who uploaded artwork.
+        :param filename: the generated filename of the uploaded artwork.
+        """
+        new_artwork = Artwork(created_by=user.snowflake, image_path=filename)
+        self.get_session().add(new_artwork)
+        self.get_session().commit()
 
-
+    def update_existing_artwork(self, existing_artwork, filename):
+        """
+        Function to update an already populated artwork entry.
+        :param existing_artwork: the artwork entry to update
+        :param filename: the generated filename of the updated file.
+        """
+        existing_artwork.image_path = filename
+        existing_artwork.created_at = datetime.now()
+        self.get_session().commit()
