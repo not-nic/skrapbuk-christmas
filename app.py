@@ -14,6 +14,7 @@ app.config["DISCORD_REDIRECT_URI"] = "http://localhost:8080/callback"
 app.config["DISCORD_BOT_TOKEN"] = os.getenv('SB_BOT_TOKEN')
 app.config["SQLALCHEMY_DATABASE_URI"] = 'mysql://nic:password@localhost:3306/skrapbuk'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['UPLOAD_FOLDER'] = 'uploads'
 
 database = Database(app)
 discord = DiscordOAuth2Session(app)

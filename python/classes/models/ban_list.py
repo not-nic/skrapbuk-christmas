@@ -7,7 +7,7 @@ class BanList(database.Model):
     reason = Column(Text)
     banned_user = database.relationship('User')
 
-    def __int__(self, user_snowflake, reason, banned_user):
+    def __init__(self, user_snowflake, reason, banned_user):
         self.user_snowflake = user_snowflake
         self.reason = reason
         self.banned_user = banned_user

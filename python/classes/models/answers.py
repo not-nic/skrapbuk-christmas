@@ -10,12 +10,13 @@ class Answers(database.Model):
     fav_food = Column(Text)
     hobby_interest = Column(Text)
 
-    def __int__(self, user_snowflake, fav_game, fav_colour, fav_song,
+    def __init__(self, user_snowflake, fav_game, fav_colour, fav_song,
                 fav_film, fav_food, hobby_interest):
         self.user_snowflake = user_snowflake
         self.fav_game = fav_game
         self.fav_colour = fav_colour
         self.fav_song = fav_song
+        self.fav_film = fav_film
         self.fav_food = fav_food
         self.hobby_interest = hobby_interest
 

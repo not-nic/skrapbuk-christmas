@@ -6,7 +6,8 @@ export default defineComponent({
   data() {
     return {
       countdown: "",
-      user: {}
+      user: {},
+      image: null as File | null,
     }
   },
 
@@ -18,7 +19,7 @@ export default defineComponent({
   methods: {
     async fetchTime() {
       try {
-        const response = await axios.get("/api/countdown", {withCredentials: true});
+        const response = await axios.get("/api/event/countdown", {withCredentials: true});
         this.countdown = response.data.countdown;
       } catch (error) {
         console.error(error);
@@ -27,7 +28,7 @@ export default defineComponent({
 
     async getUser() {
       try {
-        const response = await axios.get("/api/user", {withCredentials: true})
+        const response = await axios.get("/api/users/me", {withCredentials: true})
 
         console.log(response.data)
         this.user = response.data;
@@ -39,6 +40,54 @@ export default defineComponent({
 
     redirect(route: string) {
       window.location.href= `http://localhost:8080/${route}`;
+    },
+
+    async createQuestions() {
+      try {
+        const request = await axios.post("/api/users/answers",{
+          game: 'Farming Simulator 22',
+          colour: 'Orange',
+          song: 'The Wombats: Tokyo',
+          film: 'Hot Fuzz',
+          food: 'Fish n Chips',
+          hobby: "Programming & Being Bri''ish"
+        }, {withCredentials: true})
+        console.log(request)
+
+      } catch(error) {
+        console.error(error)
+      }
+    },
+
+    changeImage(event: Event) {
+      const target = event.target as HTMLInputElement;
+
+      if (target.files && target.files.length > 0) {
+        this.image = target.files[0];
+      } else {
+        this.image = null;
+      }
+    },
+
+    async uploadImage() {
+      if (this.image) {
+        try {
+          const formData = new FormData();
+          {
+            formData.append('image', this.image);
+
+            const response = await axios.post('/api/users/upload', formData, {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+                withCredentials: true
+              }
+            });
+            console.log(response.data);
+          }
+        } catch (error: object) {
+          console.error('Error uploading file:', error.response.data.error)
+        }
+      }
     }
   }
 })
@@ -54,10 +103,17 @@ export default defineComponent({
   <div>
     <p>Countdown: {{countdown}}</p>
   </div>
-  <div class="buttons">
-    <button @click="redirect('join')">join</button>
-    <button @click="redirect('start')">start</button>
-    <button @click="redirect('users')">users</button>
+  <div class="container">
+    <div class="buttons">
+      <button @click="redirect('users/join')">join</button>
+      <button @click="redirect('event/start')">start</button>
+      <button @click="redirect('users/all')">users</button>
+      <button @click="createQuestions()">create questions</button>
+    </div>
+    <div class="upload">
+      <input type="file" @change="changeImage" ref="image" />
+      <button @click="uploadImage" :disabled="!image">Upload Image</button>
+    </div>
   </div>
 </template>
 
@@ -65,6 +121,12 @@ export default defineComponent({
 p {
   font-family: 'Sniglet', cursive;
   font-size: 18px;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .buttons {

@@ -1,10 +1,16 @@
-from flask import Blueprint, request, jsonify
+import os
+
+from datetime import datetime
+from flask import Blueprint, request, jsonify, send_from_directory
 from flask_discord import requires_authorization
 from python.classes.models.user import User
 from python.classes.models.answers import Answers
-from app import database, config, discord, logger
+from python.classes.models.artwork import Artwork
+from app import app, database, config, discord, logger
 
 users = Blueprint('users_blueprint', __name__, url_prefix='/users')
+
+ALLOWED_FORMATS = {"png", "jpg", "jpeg", "gif", "mp3", "mp4"}
 
 @requires_authorization
 def in_server() -> bool:
@@ -82,7 +88,6 @@ def update_answers(snowflake, data) -> bool:
     Function to update questions answers if the user has already created  them.
     :param snowflake: discord snowflake.
     :param data: (json) data to update answers.
-
     Returns:
         (bool) returns a bool based on if the user was found and questions were updated.
     """
@@ -189,7 +194,119 @@ def user_partner():
         "answers" : get_answers(partner_snowflake)
     })
 
-@users.route("/all", methods=['GET'])
+@users.route("/upload", methods=['POST'])
+@requires_authorization
+@config.is_banned
+@config.has_partner
+def upload_artwork():
+    """
+    Endpoint to handle artwork uploads during the event.
+    Returns:
+        (json) message if the file is uploaded successfully or unsuccessfully.
+    """
+    # check if request has a file part
+    if 'image' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
+    file = request.files["image"]
+    original_filename = file.filename
+
+    # check if the filename is blank
+    if original_filename == "":
+        return jsonify({"error": "No file selected."}), 400
+
+    # if the file exists, and is in an accepted image format .gif, .png, etc...
+    if file and accepted_image_format(original_filename):
+        user = User.query.filter_by(snowflake=discord.fetch_user().id).first()
+
+        # check if the user exists
+        if user:
+            # get the partner and set a new filename
+            partner = User.query.filter_by(snowflake=user.partner).first()
+            new_filename = f"{user.username}_{partner.username}_{generate_timestamp(original_filename)}"
+
+            # check if the user has already submitted artwork and update it.
+            handle_existing_artwork(user, new_filename)
+            save_file(file, new_filename)
+
+            return jsonify({"message": "File Uploaded Successfully."}), 200
+
+        return jsonify({"error": "User not found."}), 400
+    else:
+        extension = original_filename.rsplit(".", 1)[-1]
+        return jsonify({"error": f"'{extension}' is not a valid extension, Only use {ALLOWED_FORMATS}"}), 400
+
+def handle_existing_artwork(user, filename):
+    """
+    Handle users who have already submitted artwork by deleting the existing file
+    and replacing it with the new file.
+    :param user: the user who is attempting to replace the file.
+    :param filename: filename of the new file.
+    """
+    existing_artwork = Artwork.query.filter_by(created_by=user.snowflake).first()
+    if existing_artwork:
+        existing_file_path = os.path.join(app.config['UPLOAD_FOLDER'], existing_artwork.image_path)
+
+        if os.path.exists(existing_file_path):
+            os.remove(existing_file_path)
+
+        database.update_existing_artwork(existing_artwork, filename)
+    else:
+        database.create_artwork_entry(user, filename)
+
+def save_file(file, new_filename):
+    """
+    Function to save file / artwork to the file system.
+    :param file: The file to be saved.
+    :param new_filename: the file's filename.
+    """
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], new_filename)
+    file.save(filepath)
+
+def generate_timestamp(filename):
+    """
+    Generate a timestamp for the file, keeping its existing extension.
+    :param filename to get extension from.
+    Returns:
+        string of timestamp and file extension e.g. 01112023005121.png
+    """
+    timestamp = datetime.now().strftime('%d%m%Y%H%M%S')
+    file_extension = os.path.splitext(filename)
+    return f'{timestamp}{file_extension[1]}'
+
+def accepted_image_format(filename) -> bool:
+    """
+    Return boolean if the file is / is not in the ALLOWED_FORMATS list.
+    """
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_FORMATS
+
+@users.route("/artwork", methods=["GET"])
+@requires_authorization
+@config.is_banned
+@config.has_partner
+def uploaded_file():
+    """
+    If the user is not banned & has a partner, display the image they have uploaded.
+    This endpoint does not show the artwork created for them, instead the artwork they have created.
+    Returns:
+        (file) if the artwork exists return the image/file.
+        (json) error message indicating the user or artwork doesn't exist.
+    """
+    snowflake = discord.fetch_user().id
+    user = User.query.filter_by(snowflake=snowflake).first()
+
+    if user:
+        user_artwork = Artwork.query.filter_by(created_by=user.snowflake).first()
+
+        if user_artwork:
+            return send_from_directory(app.config['UPLOAD_FOLDER'], user_artwork.image_path)
+        else:
+            return jsonify({"error": f"User ({snowflake}) has not uploaded artwork."})
+
+    else:
+        return jsonify({"error": f"User ({snowflake}) has not joined the event."})
+
+@users.route("/all", methods=["GET"])
 @requires_authorization
 @config.is_admin
 def all_users():

@@ -6,15 +6,13 @@ from app import config, discord, database
 event = Blueprint('event_blueprint', __name__, url_prefix='/event')
 
 @event.route("/countdown")
-@requires_authorization
-@config.is_banned
 def countdown():
     """
     return a countdown timer until skrapbuk starts.
     Returns:
          json object of the countdown.
     """
-    return jsonify({"countdown": config.get_countdown()})
+    return jsonify({"countdown": config.get_countdown()}), 200
 
 @event.route("/start")
 @requires_authorization
@@ -25,7 +23,7 @@ def start():
     This action can be overridden with the "/restart" endpoint.
 
     Returns:
-        str: A message indicating skrapbuk has been started or a message informing the
+        (json) message indicating skrapbuk has been started or a message informing the
         admin that it has already been initiated.
     """
     is_started = config.find_value('is_started')
@@ -34,9 +32,9 @@ def start():
     if not is_started:
         database.pair_users()
         config.update_value('is_started', True)
-        return f"{started_by} has started the Skrapbuk-Christmas event!"
+        return jsonify({"message": f"Skrapbuk Started by {started_by}!"}), 200
     else:
-        return f"Skrapbuk event has already been started by {started_by}."
+        return jsonify({"message": f"Skrapbuk event has already been started by {started_by}."}), 200
 
 @event.route("/pairs")
 @requires_authorization
@@ -46,7 +44,7 @@ def get_partners():
     A function to show admins each user and their respective 'partner'.
 
     Returns:
-        Json object of user information and their 'partner' information.
+        (Json) object of user information and their 'partner' information.
     """
     # Return all users with a partner
     users = User.query.filter(User.is_banned == False).all()
