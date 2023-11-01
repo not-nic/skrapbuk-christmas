@@ -314,3 +314,24 @@ def all_users():
     Function for admins to get all the users from the database and return them as a Json object.
     """
     return database.get_all_users()
+
+@users.route("/artwork/<snowflake>", methods=["GET"])
+@requires_authorization
+@config.is_admin
+def get_artwork_from_id(snowflake):
+    """
+    Function to allow admins to get the artwork of a user based on their snowflake.
+    :param snowflake: discord snowflake.
+    Returns:
+        (file) if successful the uploaded file for the desired user.
+        (json) response error response message.
+    """
+    user = User.query.filter_by(snowflake=snowflake).first()
+    if user:
+        artwork = Artwork.query.filter_by(created_by=user.snowflake).first()
+        if artwork:
+            return send_from_directory(app.config['UPLOAD_FOLDER'], artwork.image_path)
+        else:
+            return jsonify({"error": f"No artwork for user {user.snowflake}"}), 400
+    else:
+        return jsonify({"error": f"No user with {snowflake} snowflake."}), 400
