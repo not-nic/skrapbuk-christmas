@@ -95,7 +95,7 @@ export default defineComponent({
 
 <template>
   <div>
-    <img src="./assets/sb.svg" alt="Skrapbuk Logo">
+    <img src="../assets/sb.svg" alt="Skrapbuk Logo">
   </div>
   <div class="user">
     <span>{{user}}</span>
