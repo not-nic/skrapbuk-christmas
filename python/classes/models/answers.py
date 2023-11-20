@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text, ForeignKey
 from python.classes.database import database
+
 class Answers(database.Model):
     id = Column(Integer, primary_key=True)
     user_snowflake = Column(String(255), ForeignKey('user.snowflake'))

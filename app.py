@@ -1,5 +1,5 @@
 import os
-from flask import Flask, redirect, request
+from flask import Flask, redirect, request, jsonify
 from flask_discord import DiscordOAuth2Session, Unauthorized
 from python.classes.database import Database
 from python.classes.logging import Logging
@@ -38,7 +38,7 @@ def login():
 @app.route("/callback/")
 def callback():
     discord.callback()
-    return redirect(location="http://localhost:5173/profile")
+    return redirect(location="http://localhost:5173/signup")
 
 @app.errorhandler(Unauthorized)
 def redirect_unauthorized(e):
@@ -50,7 +50,7 @@ def redirect_unauthorized(e):
         'ERROR'
     )
 
-    return redirect(location="http://localhost:8080/")
+    return jsonify({'status': 'unauthorized'}), 401
 
 if __name__ == "__main__":
     app.run()

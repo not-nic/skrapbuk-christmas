@@ -48,7 +48,7 @@ class Database:
 
             for i in range(seed_amount):
                 # Generate 18 digit snowflake (same length as discord)
-                random_snowflake = random.randint(10**17, 10**18 - 1)
+                random_snowflake = random.randint(10 ** 17, 10 ** 18 - 1)
                 # create a random 'username' from ascii letters (e.g. fxdlzMyP)
                 random_name = ''.join(random.choices(string.ascii_letters, k=random.randint(5, 10)))
                 random_avatar = f"avatar_{random_name}.jpg"
@@ -106,7 +106,6 @@ class Database:
             if existing_ban:
                 return jsonify({"message": f"User ({snowflake}) is already banned."}), 200
 
-
             # user not already banned, ban the user.
             banned_user.is_banned = True
             ban_entry = BanList(
@@ -163,7 +162,6 @@ class Database:
 
         # iterate over all users
         for i in range(num_users):
-
             # calculate the index of the 'partner' creating a pseudo-circular linked list
             partner = (i + 1) % num_users
             # assign the partner to the current user
