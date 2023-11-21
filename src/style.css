@@ -61,8 +61,48 @@ button:focus-visible {
   padding: 2em;
 }
 
+.info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+  box-sizing: border-box;
+  gap: 1rem;
+  width: 100%;
+  max-height: 420px;
+  height: 100%;
+  padding: 3rem 5rem 3rem 5rem;
+
+  border-radius: 32px;
+  background: #383083;
+  box-shadow: 15px 10px 0 rgba(0, 0, 0, 0.10)
+}
+
+p {
+  margin: 0;
+  font-size: 1.2rem;
+  text-align: left;
+  line-height: 175%;
+}
+
 #app {
   width: 100%;
-  margin: 0 auto;
+  height: 100vh;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+}
+
+@media screen and (max-width: 600px)  {
+  .info {
+    align-items: center;
+    width: 100%;
+    max-height: none;
+    height: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 3rem 1.5rem 1.5rem 3rem;
+  }
 }
