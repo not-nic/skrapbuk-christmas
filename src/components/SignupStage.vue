@@ -27,7 +27,7 @@ export default defineComponent({
       <div class="circle" :class="{ 'highlighted': activeStage.highlight === stage }">
         <h3>{{stage}}</h3>
       </div>
-      <h3 v-if="activeStage.highlight === stage">{{activeStage.name}}</h3>
+      <h3 class="active" v-if="activeStage.highlight === stage">{{activeStage.name}}</h3>
     </div>
   </div>
 </template>
@@ -53,6 +53,10 @@ h3 {
   margin: 0;
 }
 
+.active {
+  filter: drop-shadow(5px 5px 0 rgba(0, 0, 0, 0.10));
+}
+
 .circle {
   display: flex;
   flex-direction: column;
@@ -64,6 +68,7 @@ h3 {
 
   border-radius: 50%;
   background-color: #FFF2DB;
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.10);
   color: #7669E4;
 
   font-family: 'Fredoka', sans-serif;
