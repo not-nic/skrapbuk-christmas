@@ -1,6 +1,6 @@
 import os
 from flask import Flask, redirect, request, jsonify
-from flask_discord import DiscordOAuth2Session, Unauthorized
+from flask_discord import DiscordOAuth2Session, Unauthorized, AccessDenied
 from python.classes.database import Database
 from python.classes.logging import Logging
 from python.config import Config
@@ -33,12 +33,38 @@ app.register_blueprint(users.users)
 
 @app.route("/")
 def login():
+    """
+    Allows the user to log in with oauth.
+    Returns:
+        a discord o-auth session.
+    """
     return discord.create_session(scope=['identify', 'guilds'])
+
+@app.route("/logout")
+def logout():
+    """
+    Revoke a discord session key allowing the user to logout.
+    Returns:
+        (403) with a message saying the user has logged out.
+    """
+    discord.revoke()
+    return jsonify({"status": "logged out"}), 403
 
 @app.route("/callback/")
 def callback():
-    discord.callback()
-    return redirect(location="http://localhost:5173/signup")
+    """
+    Try the discord callback to see if a user has successfully logged in.
+    Returns:
+        a redirect to either the signup page or homepage if they cancelled.
+    """
+    # TODO: Check the incoming request URL and
+    #  redirect the user to the page they attempted to access last.
+    try:
+        discord.callback()
+        return redirect(location="http://localhost:5173/signup")
+    except AccessDenied:
+        return redirect(location="http://localhost:5173/")
+
 
 @app.errorhandler(Unauthorized)
 def redirect_unauthorized(e):
