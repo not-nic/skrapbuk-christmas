@@ -40,24 +40,38 @@ export default defineComponent({
       ],
       answers,
       currentQuestionIndex: 0,
+      showErrorMessage: false,
+      errorMessage: ""
     }
   },
 
   methods: {
     nextQuestion() {
-      this.currentQuestionIndex++;
-
-      if (this.isLastQuestion) {
-        this.submitAnswers();
+      if (this.answers[this.currentQuestionKey] == "") {
+        this.errorMessage = "Your answer can't be empty!";
+        this.showErrorMessage = true;
       }
+      else if (this.answers[this.currentQuestionKey].length < 4) {
+        this.errorMessage = "That answer is a bit too short, could you be a little more descriptive?";
+        this.showErrorMessage = true;
+      }
+      else {
+        this.currentQuestionIndex++;
+      }
+    },
+
+    reshowQuestion() {
+      this.showErrorMessage = false
     },
 
     async submitAnswers() {
       try {
         const request = await axios.post("/api/users/answers", this.answers, {withCredentials: true})
         console.log(request.data);
-      } catch (error) {
-        console.error(error)
+      } catch (error: any) {
+        console.error(error.response.data.error)
+        this.errorMessage = `Sorry! An error has occurred: ${error.response.data.error}`
+        this.showErrorMessage = true;
       }
       console.log(this.answers)
     },
@@ -89,20 +103,22 @@ export default defineComponent({
       <div class="header">
         <SignupCard title="" end="'s question time!" :show-name="true"></SignupCard>
         <h1 class="counter" v-show="showCounter">
-          <span class="current">{{ `${currentQuestionIndex + 1}` }}</span>
+          <span class="red">{{ `${currentQuestionIndex + 1}` }}</span>
           <span>{{ `/${questions.length}` }}</span>
         </h1>
       </div>
       <div class="question-container" v-if="showCounter">
-        <p>{{ questions[currentQuestionIndex].question }}</p>
+        <p v-if="showErrorMessage" class="red">{{errorMessage}}</p>
+        <p v-else>{{ questions[currentQuestionIndex].question }}</p>
         <div class="user-input">
-          <input v-model="answers[currentQuestionKey]" @keyup.enter="nextQuestion" type="text" />
+          <input v-model="answers[currentQuestionKey]" @click="reshowQuestion" @keyup.enter="nextQuestion" type="text" />
           <button v-show="!isLastQuestion" @click="nextQuestion">Next Question</button>
-          <button v-show="isLastQuestion" class="submit" @click="nextQuestion">Submit Answers!</button>
+          <button v-show="isLastQuestion" class="submit" @click="submitAnswers">Submit Answers!</button>
         </div>
       </div>
       <div v-else class="question-container">
-        <p>All done, ready to move on?</p>
+        <p v-if="showErrorMessage" class="red">{{errorMessage}}</p>
+        <p v-else>All done, ready to move on?</p>
       </div>
     </div>
   </div>
@@ -122,7 +138,7 @@ export default defineComponent({
   font-family: 'Fredoka', sans-serif;
 }
 
-.current {
+.red {
   color: #FF7A6F;
 }
 
@@ -134,6 +150,7 @@ export default defineComponent({
   gap: 5rem;
   max-width: 1184px;
   margin: auto;
+  width: 100%;
 }
 
 .question-container {
