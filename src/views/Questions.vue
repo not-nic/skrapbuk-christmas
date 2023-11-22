@@ -111,7 +111,7 @@ export default defineComponent({
         <p v-if="showErrorMessage" class="red">{{errorMessage}}</p>
         <p v-else>{{ questions[currentQuestionIndex].question }}</p>
         <div class="user-input">
-          <input v-model="answers[currentQuestionKey]" @click="reshowQuestion" @keyup.enter="nextQuestion" type="text" />
+          <input v-model="answers[currentQuestionKey]" @click="reshowQuestion" type="text" />
           <button v-show="!isLastQuestion" @click="nextQuestion">Next Question</button>
           <button v-show="isLastQuestion" class="submit" @click="submitAnswers">Submit Answers!</button>
         </div>
