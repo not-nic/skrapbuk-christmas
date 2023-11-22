@@ -60,6 +60,11 @@ def set_answers():
     if not all(field in data for field in required_fields):
         return jsonify({"error": "Missing required JSON fields."}), 400
 
+    # check if a user has filled in every question, error if any are empty.
+    empty_answers = [field for field in required_fields if not data.get(field)]
+    if empty_answers:
+        return jsonify({"error": f"The following answers are empty: {', '.join(empty_answers)}."}), 400
+
     username = discord.fetch_user().username
     user_snowflake = discord.fetch_user().id
 
