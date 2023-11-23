@@ -1,8 +1,9 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, Text
 from python.classes.database import database
+
 class Answers(database.Model):
     id = Column(Integer, primary_key=True)
-    user_snowflake = Column(String(255), ForeignKey('user.snowflake'))
+    user_snowflake = Column(String(255))
     fav_game = Column(Text)
     fav_colour = Column(Text)
     fav_song = Column(Text)
