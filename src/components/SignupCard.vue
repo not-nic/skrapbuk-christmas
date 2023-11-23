@@ -68,11 +68,15 @@ export default defineComponent({
         this.user = response.data;
       } catch (error: any) {
 
+        let http_status = error.response?.status;
+
         // check if the user is unauthorised, if so redirect them to the login page.
-        if (error.response?.status === 401) {
+        if (http_status === 401) {
           window.location.href = "http://localhost:8080";
+        } else if (http_status === 403) {
+          this.$router.push("banned")
         } else {
-          console.error('Non-401 error:', error);
+          console.error('Non-401/403 error:', error);
         }
       }
     }

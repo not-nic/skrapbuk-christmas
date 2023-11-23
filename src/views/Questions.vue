@@ -39,9 +39,10 @@ export default defineComponent({
         {question: "Okay last one! What are some of your hobbies and interests?"}
       ],
       answers,
+      answersSubmitted: false,
       currentQuestionIndex: 0,
       showErrorMessage: false,
-      errorMessage: ""
+      errorMessage: "",
     }
   },
 
@@ -64,10 +65,15 @@ export default defineComponent({
       this.showErrorMessage = false
     },
 
+    showJoinPage() {
+      this.$router.push("join")
+    },
+
     async submitAnswers() {
       try {
         const request = await axios.post("/api/users/answers", this.answers, {withCredentials: true})
         console.log(request.data);
+        this.answersSubmitted = true;
       } catch (error: any) {
         console.error(error.response.data.error)
         this.errorMessage = `Sorry! An error has occurred: ${error.response.data.error}`
@@ -107,7 +113,7 @@ export default defineComponent({
           <span>{{ `/${questions.length}` }}</span>
         </h1>
       </div>
-      <div class="question-container" v-if="showCounter">
+      <div class="question-container" v-if="!answersSubmitted">
         <p v-if="showErrorMessage" class="red">{{errorMessage}}</p>
         <p v-else>{{ questions[currentQuestionIndex].question }}</p>
         <div class="user-input">
@@ -116,9 +122,12 @@ export default defineComponent({
           <button v-show="isLastQuestion" class="submit" @click="submitAnswers">Submit Answers!</button>
         </div>
       </div>
-      <div v-else class="question-container">
+      <div v-else-if="showErrorMessage" class="question-container">
         <p v-if="showErrorMessage" class="red">{{errorMessage}}</p>
-        <p v-else>All done, ready to move on?</p>
+      </div>
+      <div v-if="answersSubmitted" class="question-container">
+        <p>Thanks for submitting those questions! Ready to move on to the final stage?</p>
+        <button @click="showJoinPage">Let's Go!</button>
       </div>
     </div>
   </div>
