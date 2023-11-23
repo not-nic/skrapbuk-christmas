@@ -152,7 +152,9 @@ def join():
     has_joined = User.query.filter_by(snowflake=discord.fetch_user().id).first()
     if has_joined:
         return jsonify({"error" : f"Woah! {username} you are already in! "
-                                  f"Check the countdown to see how long until you can start!"}), 400
+                                  f"Check the countdown to see how long until you can start!",
+                        "joined" : True
+                        }), 400
 
     # create user with less info as @requires_authorisation does not check scopes.
     new_user = User(
@@ -170,7 +172,7 @@ def join():
         'INFO'
     )
 
-    return jsonify({"message": f"Thanks {username} for signing up to Skrapbuk Christmas!"
+    return jsonify({"message": f"Thanks {username} for signing up to Skrapbuk Christmas! "
                                f"Check the countdown to see when you can start!"}), 200
 
 @users.route("/partner", methods=['GET'])

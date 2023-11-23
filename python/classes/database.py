@@ -18,7 +18,9 @@ class Database:
         self.db.init_app(app)
         self.app = app
         # create user table on flask startup.
-        with app.app_context():
+
+    def create_all(self):
+        with self.app.app_context():
             self.db.create_all()
 
     def get_session(self):

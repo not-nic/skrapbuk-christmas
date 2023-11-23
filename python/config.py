@@ -3,7 +3,7 @@ import time
 
 from functools import wraps
 from flask_discord import DiscordOAuth2Session
-from flask import abort, request
+from flask import request, jsonify
 from python.classes.models.user import User
 from python.classes.models.ban_list import BanList
 from python.classes.models.answers import Answers
@@ -87,7 +87,8 @@ class Config:
                     message_type="INFO"
                 )
 
-                return abort(code=401)
+                return jsonify({"error" "woah there, you're not an admin you can't view this content!"}), 401
+
         return wrapper
 
     def is_banned(self, func):
@@ -111,7 +112,7 @@ class Config:
                     message_type="INFO"
                 )
 
-                return abort(code=403, description=f"You are banned, you cannot take part in Skrapbuk.")
+                return jsonify({ "error" : "You are banned, you cannot take part in Skrapbuk." }), 403
 
         return wrapper
 
@@ -136,7 +137,8 @@ class Config:
                     message=f"{discord.fetch_user().username} ({discord.fetch_user().id}) does not have a partner",
                     message_type="INFO"
                 )
-                return abort(code=403, description=f"User ({snowflake}) does not have a partner.")
+
+                return jsonify({ "error" : f"User ({snowflake}) does not have a partner" }), 403
 
         return wrapper
 
@@ -162,8 +164,9 @@ class Config:
                     message=f"{discord.fetch_user().username} ({discord.fetch_user().id}) has not answered questions.",
                     message_type="INFO"
                 )
-                return abort(code=403, description=f"{username} ({snowflake}) you have not answered the questions."
-                                                   f" Please answer all questions to join skrapbuk!")
+
+                return jsonify({ "error" : f"{username} ({snowflake}) you have not answered the questions."
+                                           f" Please answer all questions to join skrapbuk!" }), 403
 
         return wrapper
 
