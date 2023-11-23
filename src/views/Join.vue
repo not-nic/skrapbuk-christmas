@@ -3,7 +3,7 @@ import {defineComponent} from 'vue'
 import Grid from "../components/Grid.vue";
 import SignupStage from "../components/SignupStage.vue";
 import SignupCard from "../components/SignupCard.vue";
-import axios, {request} from "axios";
+import axios from "axios";
 
 export default defineComponent({
   name: "Join",
