@@ -88,7 +88,16 @@ h3 {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 5rem;
+    padding-top: 2rem;
+    gap: 0;
+  }
+
+  .circles {
+    flex-direction: column;
+  }
+
+  .circle:not(.highlighted) {
+    display: none;
   }
 }
 </style>
