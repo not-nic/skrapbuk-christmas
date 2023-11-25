@@ -2,12 +2,12 @@
 import {defineComponent} from 'vue'
 import SignupStage from "../components/SignupStage.vue";
 import Grid from "../components/Grid.vue";
-import SignupCard from "../components/SignupCard.vue";
+import ProfileCard from "../components/ProfileCard.vue";
 import Logout from "../components/Logout.vue";
 
 export default defineComponent({
   name: "Signup",
-  components: {Logout, SignupCard, Grid, SignupStage},
+  components: {Logout, ProfileCard, Grid, SignupStage},
 
   methods: {
     /**
@@ -26,7 +26,7 @@ export default defineComponent({
   <div class="sign-up">
     <SignupStage :active-stage="{highlight: 1, name: 'Get Ready!'}"></SignupStage>
     <div class="info">
-      <SignupCard></SignupCard>
+      <ProfileCard></ProfileCard>
       <p>
         Looks like you're all logged in!
         Just make sure you've read through <a href="/">Gom's Guide</a>

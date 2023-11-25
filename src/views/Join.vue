@@ -2,12 +2,13 @@
 import {defineComponent} from 'vue'
 import Grid from "../components/Grid.vue";
 import SignupStage from "../components/SignupStage.vue";
-import SignupCard from "../components/SignupCard.vue";
+import ProfileCard from "../components/ProfileCard.vue";
 import axios from "axios";
+import Logout from "../components/Logout.vue";
 
 export default defineComponent({
   name: "Join",
-  components: {SignupCard, SignupStage, Grid},
+  components: {Logout, ProfileCard, SignupStage, Grid},
 
   data() {
     return {
@@ -48,12 +49,12 @@ export default defineComponent({
 </script>
 
 <template>
-<div>
   <Grid></Grid>
+  <Logout></Logout>
   <div class="join">
     <SignupStage :active-stage="{highlight: 3, name: 'Join in!'}"></SignupStage>
     <div class="info">
-      <SignupCard title="" end=" it's time to join!" :show-name="true"></SignupCard>
+      <ProfileCard title="" end=" it's time to join!" :show-name="true"></ProfileCard>
       <p>
         That was easy! All your answers have been submitted, so all that’s left to do is join the event!
         <br>Once you join, you’ll be taken to a profile we’ve set up for you.
@@ -64,8 +65,6 @@ export default defineComponent({
       <button @click="join">Join Skrapbuk Christmas!</button>
     </div>
   </div>
-
-</div>
 </template>
 
 <style scoped>
@@ -95,5 +94,9 @@ export default defineComponent({
 button:hover {
   color: #FFF2DB;
   border-color: #0000001A;
+}
+
+p {
+  color: #FFF6E7;
 }
 </style>

@@ -2,7 +2,7 @@
 import {defineComponent} from 'vue'
 import Grid from "../components/Grid.vue";
 import SignupStage from "../components/SignupStage.vue";
-import SignupCard from "../components/SignupCard.vue";
+import ProfileCard from "../components/ProfileCard.vue";
 import axios from "axios";
 import Logout from "../components/Logout.vue";
 
@@ -17,7 +17,7 @@ interface Answers {
 
 export default defineComponent({
   name: "Questions",
-  components: {Logout, SignupCard, SignupStage, Grid},
+  components: {Logout, ProfileCard, SignupStage, Grid},
 
   data() {
     const answers: Answers = {
@@ -107,7 +107,7 @@ export default defineComponent({
     <SignupStage :active-stage="{highlight: 2, name: 'Questions!'}"></SignupStage>
     <div class="info">
       <div class="header">
-        <SignupCard title="" end="'s question time!" :show-name="true"></SignupCard>
+        <ProfileCard title="" end="'s question time!" :show-name="true"></ProfileCard>
         <h1 class="counter" v-show="showCounter">
           <span class="red">{{ `${currentQuestionIndex + 1}` }}</span>
           <span>{{ `/${questions.length}` }}</span>
