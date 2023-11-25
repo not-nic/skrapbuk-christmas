@@ -2,11 +2,11 @@
 import {defineComponent} from 'vue'
 
 export default defineComponent({
-  name: "Takeoff",
+  name: "Landing",
 
   methods: {
-    visitProfile() {
-      window.location.href= `http://localhost:8080/`;
+    start() {
+      window.location.href=`/api/`;
     }
   }
 })
@@ -15,7 +15,7 @@ export default defineComponent({
 <template>
   <div class="landing">
     <div class="header">
-      <button @click="visitProfile">Lets Go!</button>
+      <button @click="start">Lets Go!</button>
     </div>
     <div class="content">
       <div class="splash-container">

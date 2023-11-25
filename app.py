@@ -15,6 +15,7 @@ app.config["DISCORD_BOT_TOKEN"] = os.getenv('SB_BOT_TOKEN')
 app.config["SQLALCHEMY_DATABASE_URI"] = 'mysql://nic:password@localhost:3306/skrapbuk'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['FRONTEND_BASE_URL'] = "http://localhost:5173"
 
 database = Database(app)
 discord = DiscordOAuth2Session(app)
@@ -59,12 +60,12 @@ def callback():
     """
     # TODO: Check the incoming request URL and
     #  redirect the user to the page they attempted to access last.
+    frontend_base_url = app.config.get('FRONTEND_BASE_URL')
     try:
         discord.callback()
-        return redirect(location="http://localhost:5173/signup")
+        return redirect(f"{frontend_base_url}/signup")
     except AccessDenied:
-        return redirect(location="http://localhost:5173/")
-
+        return redirect(f"{frontend_base_url}/")
 
 @app.errorhandler(Unauthorized)
 def redirect_unauthorized(e):
