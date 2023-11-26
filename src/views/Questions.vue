@@ -50,7 +50,11 @@ export default defineComponent({
       }
       // check if answer is > 4 characters before letting them move on.
       else if (this.answers[this.currentQuestionKey].length < 4) {
-        this.errorMessage = "That answer is a bit too short, could you be a little more descriptive?";
+        this.errorMessage = "That answer is a bit too short, could you be a little more descriptive? (Min 4 Characters)";
+        this.showErrorMessage = true;
+      }
+      else if (this.answers[this.currentQuestionKey].length > 280) {
+        this.errorMessage = "Woah, that answer is quite long! Maybe you could shorten it? (Max 280 Characters)";
         this.showErrorMessage = true;
       }
       else {
