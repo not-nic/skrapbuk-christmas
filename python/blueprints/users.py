@@ -65,6 +65,12 @@ def set_answers():
     if empty_answers:
         return jsonify({"error": f"The following answers are empty: {', '.join(empty_answers)}."}), 400
 
+    # check if any answers exceeds 280 characters.
+    exceeding_answers = [field for field in required_fields if len(str(data[field])) > 280]
+    if exceeding_answers:
+        return jsonify({"error": f"The following answers exceed the character limit:"
+                                 f" {', '.join(exceeding_answers)}."}), 400
+
     username = discord.fetch_user().username
     user_snowflake = discord.fetch_user().id
 
