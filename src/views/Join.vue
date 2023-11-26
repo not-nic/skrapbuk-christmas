@@ -19,25 +19,31 @@ export default defineComponent({
   },
 
   methods: {
+    /**
+     * Async function to join the skrapbuk event, on success or error return a message.
+     */
     async join() {
       try {
         const response = await axios.get("/api/users/join", {withCredentials: true})
         console.log(response.data)
         this.successMessage = response.data.message
+
+        // set a 5-second timeout before pushing the user to their profile.
         setTimeout(() => {
           this.$router.push("profile")
         }, 5000)
 
       } catch (error: any) {
 
+        // check if the response has a joined key/value, if so redirect them to their profile,
+        // again after 5-seconds.
         if (error.response.data.joined) {
           this.successMessage = "You're already in! Redirecting you to your profile in 5 seconds."
           setTimeout(() => {
             this.$router.push("profile")
           }, 5000)
-        }
-
-        else {
+        } else {
+          // display an error message to the user.
           this.errorMessage = `${error.response.data.error}`
           this.showErrorMessage = true;
         }

@@ -34,8 +34,9 @@ export const useUserStore = defineStore('userStore', {
 
         /**
          * Custom error handler for backend responses, uses a switch case on known responses such as 401 or 403.
-         * @param error - Axios error object
-         * @param customHandlers - Custom response such as an error message contents, or boolean to activate a v-if.
+         * @param error {any} - Axios error object
+         * @param customHandlers {object} - Custom response such as an error message contents,
+         * or boolean to activate a v-if.
          */
         async errorHandler(error: any,
                            customHandlers: { customErrorHandler?: (error: any) => void} = {}): Promise<void> {
@@ -98,7 +99,7 @@ export const useUserStore = defineStore('userStore', {
 
         /**
          * Allow a user to copy their own discord snowflake to clipboard.
-         * @param snowflake - discord snowflake to copy.
+         * @param snowflake {number} - discord snowflake to copy.
          */
         async copySnowflake(snowflake: number) {
             try {

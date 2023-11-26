@@ -5,15 +5,7 @@ import SignupStage from "../components/SignupStage.vue";
 import ProfileCard from "../components/ProfileCard.vue";
 import axios from "axios";
 import Logout from "../components/Logout.vue";
-
-interface Answers {
-  game: string;
-  colour: string;
-  song: string;
-  film: string;
-  food: string;
-  hobby: string;
-}
+import {Answers} from "../ts/Answers.ts";
 
 export default defineComponent({
   name: "Questions",
@@ -47,28 +39,43 @@ export default defineComponent({
   },
 
   methods: {
+    /**
+     * Function to control the user progressing through questions.
+     */
     nextQuestion() {
+      // check if answer is not null before letting user move on.
       if (this.answers[this.currentQuestionKey] == "") {
         this.errorMessage = "Your answer can't be empty!";
         this.showErrorMessage = true;
       }
+      // check if answer is > 4 characters before letting them move on.
       else if (this.answers[this.currentQuestionKey].length < 4) {
         this.errorMessage = "That answer is a bit too short, could you be a little more descriptive?";
         this.showErrorMessage = true;
       }
       else {
+        // questions passed checks, increment question index and take user to next question.
         this.currentQuestionIndex++;
       }
     },
 
+    /**
+     * If a user caused an error message, focusing on the input box makes it disappear.
+     */
     reshowQuestion() {
       this.showErrorMessage = false
     },
 
+    /**
+     * Push router to the final stage of sign up - join page.
+     */
     showJoinPage() {
       this.$router.push("join")
     },
 
+    /**
+     * Function to submit user answers to database during signup.
+     */
     async submitAnswers() {
       try {
         const request = await axios.post("/api/users/answers", this.answers, {withCredentials: true})
