@@ -7,13 +7,60 @@ export default defineComponent({
 
   data() {
     return {
-      userStore: useUserStore()
+      userStore: useUserStore(),
+      loading: true
     }
   },
 
   mounted() {
+    this.awaitPartnerDetails();
     this.userStore.revealPartner();
+  },
+
+  methods: {
+    /**
+     * Function to ensure that user details have been fetched and stored in pinia
+     * before attempting to display them to the page.
+     */
+    async awaitPartnerDetails() {
+      try {
+        await this.userStore.getPartner();
+      } catch (error) {
+        console.error("Error getting partner details: ", error);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    /**
+     * Function to convert a discord snowflake into an account created timestamp.
+     * @param snowflake {number} - The Discord snowflake.
+     * @returns {string} - Returns string of day/month/year date.
+     */
+    snowflakeToTimestamp(snowflake: number): string {
+      const DISCORD_EPOCH = 1420070400000 // Discord epoch (01-01-2015)
+
+      // shift & discard 22 bits of the 64-bit integer,
+      // keeping 42 where the timestamp is stored.
+      const milliseconds = BigInt(snowflake) >> 22n
+      const timestamp = new Date(Number(milliseconds) + DISCORD_EPOCH)
+
+      // create new date, padding any days / month that start with 0
+      const date = new Date(timestamp)
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-indexed
+      const year = date.getFullYear();
+
+      return `${day}/${month}/${year}`;
+    }
+  },
+
+  computed: {
+    details() {
+      return this.userStore.partner ? this.userStore.partner.details : null;
+    }
   }
+
 })
 </script>
 
@@ -23,12 +70,15 @@ export default defineComponent({
     <h1>Click to Reveal</h1>
   </div>
   <div v-else class="revealed">
-    <div class="profile-info">
-      <img class="avatar" src="../assets/gom.webp" alt="partner discord icon"/>
-      <h1>username</h1>
-      <p>Member Since:</p>
+    <div v-if="loading" class="profile-info">
+      <p>Loading...</p>
     </div>
-    <p>*Shhh, don’t tell anyone who your recipient is!*</p>
+    <div v-else class="profile-info">
+      <img class="avatar" :src="details ? details.avatar_url : userStore.defaultImg" alt="recipient discord icon"/>
+      <h1>{{ details ? details.username : 'Unknown' }}</h1>
+      <p v-if="details"> Member Since: <span class="red">{{ snowflakeToTimestamp(details.snowflake) }}</span></p>
+    </div>
+    <p class="shh">*Shhh, don’t tell anyone who your recipient is!*</p>
   </div>
 </div>
 </template>
@@ -41,7 +91,7 @@ export default defineComponent({
   max-width: 340px;
   min-height: 600px;
   border-radius: 14px;
-  background: linear-gradient(175deg, #2C2760 43.54%, #373268 43.54%, #373268 96.92%);
+  background: linear-gradient(-195deg, #2C2760 36.34%, #373268 36.34%, #373268 95.9%);
   box-shadow: 6px 6px 0 0 rgba(0, 0, 0, 0.10);
   padding: 1rem;
 }
@@ -58,14 +108,33 @@ export default defineComponent({
   height: 100%;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 0.5rem;
 }
 
 h1 {
   margin: 0;
   font-family: 'Fredoka', sans-serif;
   color: #FF7A6F;
+}
+
+span {
+  color: #FF7A6F;
+}
+
+.shh {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #cdc2be;
 }
 
 .avatar {
