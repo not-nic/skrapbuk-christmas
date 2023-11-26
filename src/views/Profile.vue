@@ -8,9 +8,10 @@ import {useUserStore} from "../stores/UserStore.ts";
 import UserOptions from "../components/UserOptions.vue";
 import AdminOptions from "../components/AdminOptions.vue";
 import PartnerCard from "../components/PartnerCard.vue";
+import PartnerAnswers from "../components/PartnerAnswers.vue";
 
 export default defineComponent({
-  components: {PartnerCard, AdminOptions, UserOptions, ProfileCard, Logout, Grid},
+  components: {PartnerAnswers, PartnerCard, AdminOptions, UserOptions, ProfileCard, Logout, Grid},
   data() {
     return {
       countdown: "",
@@ -81,6 +82,7 @@ export default defineComponent({
           </div>
           <div class="content">
             <PartnerCard></PartnerCard>
+            <PartnerAnswers></PartnerAnswers>
           </div>
         </div>
       </div>
@@ -102,7 +104,7 @@ export default defineComponent({
   justify-content: center;
   align-items: center;
   gap: 5rem;
-  max-width: 1400px;
+  max-width: 1600px;
   margin: auto;
   width: 100%;
 }
@@ -124,6 +126,9 @@ export default defineComponent({
 
 .content {
   flex: 1;
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
 }
 
 .nav {
@@ -141,6 +146,12 @@ export default defineComponent({
     flex-direction: column;
     gap: 1rem;
     width: 100%;
+  }
+
+  .content {
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
   }
 }
 </style>
