@@ -142,4 +142,14 @@ span {
   border: 0.5rem solid rgb(0, 0, 0, 0.3);
   border-radius: 50%;
 }
+
+@media screen and (max-width: 600px) {
+  .card {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    min-height: 0;
+  }
+
+}
 </style>
