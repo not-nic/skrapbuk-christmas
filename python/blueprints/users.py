@@ -197,7 +197,7 @@ def user_partner():
     }
 
     return jsonify({
-        "partner" : partner_info,
+        "details" : partner_info,
         "answers" : get_answers(partner_snowflake)
     })
 
