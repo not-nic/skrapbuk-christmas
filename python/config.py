@@ -87,7 +87,7 @@ class Config:
                     message_type="INFO"
                 )
 
-                return jsonify({"error" "woah there, you're not an admin you can't view this content!"}), 401
+                return jsonify({"error": "woah there, you're not an admin you can't view this content!"}), 401
 
         return wrapper
 
@@ -112,7 +112,7 @@ class Config:
                     message_type="INFO"
                 )
 
-                return jsonify({ "error" : "You are banned, you cannot take part in Skrapbuk." }), 403
+                return jsonify({ "error": "You are banned, you cannot take part in Skrapbuk." }), 403
 
         return wrapper
 
@@ -138,7 +138,7 @@ class Config:
                     message_type="INFO"
                 )
 
-                return jsonify({ "error" : f"User ({snowflake}) does not have a partner" }), 403
+                return jsonify({ "error" : f"User ({snowflake}) does not have a partner" }), 400
 
         return wrapper
 
@@ -166,7 +166,7 @@ class Config:
                 )
 
                 return jsonify({ "error" : f"{username} ({snowflake}) you have not answered the questions."
-                                           f" Please answer all questions to join skrapbuk!" }), 403
+                                           f" Please answer all questions to join skrapbuk!" }), 400
 
         return wrapper
 
