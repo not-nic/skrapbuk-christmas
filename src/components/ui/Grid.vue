@@ -14,7 +14,7 @@ export default defineComponent({
   .grid-bg {
     z-index: -9999999;
     height: 100vh;
-    background: url("../assets/dotsbg.png");
+    background: url("../../assets/dotsbg.png");
     background-size: 40px;
     position: fixed;
     top: 0;

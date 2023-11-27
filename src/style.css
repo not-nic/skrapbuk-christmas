@@ -19,7 +19,7 @@
 body {
   margin: 0;
   display: flex;
-  place-items: center;
+  place-content: center;
   min-width: 320px;
   min-height: 100vh;
 }
@@ -57,10 +57,6 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-.card {
-  padding: 2em;
-}
-
 .info {
   display: flex;
   flex-direction: column;
@@ -87,12 +83,30 @@ p {
 
 #app {
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   text-align: center;
   display: flex;
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
+}
+
+.item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.item > button {
+  text-align: start;
+  font-family: 'Fredoka', sans-serif;
+  padding: 0.4em 2em;
+  font-size: 1.2rem;
+  letter-spacing: 0.06rem;
+  border-radius: 6px;
+  color: #FFF2DB;
+
 }
 
 @media screen and (max-width: 600px)  {

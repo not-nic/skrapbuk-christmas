@@ -1,23 +1,15 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import Grid from "../components/Grid.vue";
-import SignupStage from "../components/SignupStage.vue";
-import SignupCard from "../components/SignupCard.vue";
+import Grid from "../components/ui/Grid.vue";
+import SignupStage from "../components/signup/SignupStage.vue";
+import ProfileCard from "../components/ui/ProfileCard.vue";
 import axios from "axios";
-import Logout from "../components/Logout.vue";
-
-interface Answers {
-  game: string;
-  colour: string;
-  song: string;
-  film: string;
-  food: string;
-  hobby: string;
-}
+import Logout from "../components/ui/Logout.vue";
+import {Answers} from "../ts/Answers.ts";
 
 export default defineComponent({
   name: "Questions",
-  components: {Logout, SignupCard, SignupStage, Grid},
+  components: {Logout, ProfileCard, SignupStage, Grid},
 
   data() {
     const answers: Answers = {
@@ -38,6 +30,7 @@ export default defineComponent({
         {question: "Amazing! What is your favourite food to eat?"},
         {question: "Okay last one! What are some of your hobbies and interests?"}
       ],
+
       answers,
       answersSubmitted: false,
       currentQuestionIndex: 0,
@@ -47,28 +40,47 @@ export default defineComponent({
   },
 
   methods: {
+    /**
+     * Function to control the user progressing through questions.
+     */
     nextQuestion() {
+      // check if answer is not null before letting user move on.
       if (this.answers[this.currentQuestionKey] == "") {
         this.errorMessage = "Your answer can't be empty!";
         this.showErrorMessage = true;
       }
+      // check if answer is > 4 characters before letting them move on.
       else if (this.answers[this.currentQuestionKey].length < 4) {
-        this.errorMessage = "That answer is a bit too short, could you be a little more descriptive?";
+        this.errorMessage = "That answer is a bit too short, could you be a little more descriptive? (Min 4 Characters)";
+        this.showErrorMessage = true;
+      }
+      else if (this.answers[this.currentQuestionKey].length > 280) {
+        this.errorMessage = "Woah, that answer is quite long! Maybe you could shorten it? (Max 280 Characters)";
         this.showErrorMessage = true;
       }
       else {
+        // answer passed checks, increment question index and take user to next question.
         this.currentQuestionIndex++;
       }
     },
 
+    /**
+     * If a user caused an error message, focusing on the input box makes it disappear.
+     */
     reshowQuestion() {
       this.showErrorMessage = false
     },
 
+    /**
+     * Push router to the final stage of sign up - join page.
+     */
     showJoinPage() {
       this.$router.push("join")
     },
 
+    /**
+     * Function to submit user answers to database during signup.
+     */
     async submitAnswers() {
       try {
         const request = await axios.post("/api/users/answers", this.answers, {withCredentials: true})
@@ -107,7 +119,7 @@ export default defineComponent({
     <SignupStage :active-stage="{highlight: 2, name: 'Questions!'}"></SignupStage>
     <div class="info">
       <div class="header">
-        <SignupCard title="" end="'s question time!" :show-name="true"></SignupCard>
+        <ProfileCard title="" end="'s question time!" :show-name="true"></ProfileCard>
         <h1 class="counter" v-show="showCounter">
           <span class="red">{{ `${currentQuestionIndex + 1}` }}</span>
           <span>{{ `/${questions.length}` }}</span>

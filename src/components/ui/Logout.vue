@@ -11,7 +11,6 @@ export default defineComponent({
         await axios.get("/api/logout", {withCredentials: true})
       } catch (error: any) {
         if (error.response.status === 403) {
-          console.log("User logged successfully!")
           // TODO: Instead of pushing to the home, push to a logout page.
           this.$router.push("/")
         } else {

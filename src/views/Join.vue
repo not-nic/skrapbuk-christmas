@@ -1,13 +1,14 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import Grid from "../components/Grid.vue";
-import SignupStage from "../components/SignupStage.vue";
-import SignupCard from "../components/SignupCard.vue";
+import Grid from "../components/ui/Grid.vue";
+import SignupStage from "../components/signup/SignupStage.vue";
+import ProfileCard from "../components/ui/ProfileCard.vue";
 import axios from "axios";
+import Logout from "../components/ui/Logout.vue";
 
 export default defineComponent({
   name: "Join",
-  components: {SignupCard, SignupStage, Grid},
+  components: {Logout, ProfileCard, SignupStage, Grid},
 
   data() {
     return {
@@ -18,25 +19,31 @@ export default defineComponent({
   },
 
   methods: {
+    /**
+     * Async function to join the skrapbuk event, on success or error return a message.
+     */
     async join() {
       try {
         const response = await axios.get("/api/users/join", {withCredentials: true})
         console.log(response.data)
         this.successMessage = response.data.message
+
+        // set a 5-second timeout before pushing the user to their profile.
         setTimeout(() => {
           this.$router.push("profile")
         }, 5000)
 
       } catch (error: any) {
 
+        // check if the response has a joined key/value, if so redirect them to their profile,
+        // again after 5-seconds.
         if (error.response.data.joined) {
           this.successMessage = "You're already in! Redirecting you to your profile in 5 seconds."
           setTimeout(() => {
             this.$router.push("profile")
           }, 5000)
-        }
-
-        else {
+        } else {
+          // display an error message to the user.
           this.errorMessage = `${error.response.data.error}`
           this.showErrorMessage = true;
         }
@@ -48,12 +55,12 @@ export default defineComponent({
 </script>
 
 <template>
-<div>
   <Grid></Grid>
+  <Logout></Logout>
   <div class="join">
     <SignupStage :active-stage="{highlight: 3, name: 'Join in!'}"></SignupStage>
     <div class="info">
-      <SignupCard title="" end=" it's time to join!" :show-name="true"></SignupCard>
+      <ProfileCard title="" end=" it's time to join!" :show-name="true"></ProfileCard>
       <p>
         That was easy! All your answers have been submitted, so all that’s left to do is join the event!
         <br>Once you join, you’ll be taken to a profile we’ve set up for you.
@@ -64,8 +71,6 @@ export default defineComponent({
       <button @click="join">Join Skrapbuk Christmas!</button>
     </div>
   </div>
-
-</div>
 </template>
 
 <style scoped>
@@ -95,5 +100,9 @@ export default defineComponent({
 button:hover {
   color: #FFF2DB;
   border-color: #0000001A;
+}
+
+p {
+  color: #FFF6E7;
 }
 </style>

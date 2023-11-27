@@ -1,6 +1,14 @@
-import { createApp } from 'vue'
+import {createApp, markRaw} from 'vue'
+import { createPinia } from 'pinia'
 import './style.css'
 import App from './App.vue'
 import router from './router'
 
-createApp(App).use(router).mount('#app')
+const pinia = createPinia()
+
+// allow vue-router to be used in pinia store.
+pinia.use(({ store }) => {
+    store.$router = markRaw(router)
+})
+
+createApp(App).use(router).use(pinia).mount('#app')

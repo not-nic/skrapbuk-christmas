@@ -1,26 +1,16 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import axios from "axios";
-
-interface Profile {
-  username: string,
-  snowflake: number,
-  avatar_url: string,
-  in_server: boolean,
-  is_admin: boolean,
-  is_banned: boolean,
-  partner: number
-}
+import {useUserStore} from "../../stores/UserStore.ts";
 
 export default defineComponent({
-  name: "SignupCard",
+  name: "ProfileCard",
 
   data() {
     return {
-      user: {} as Profile,
+      userStore: useUserStore(),
       rotateDeg: 0,
       defaultImg: "../src/assets/gom.webp",
-      clickCount: 0
+      clickCount: 0,
     }
   },
 
@@ -41,7 +31,23 @@ export default defineComponent({
       type: Boolean,
       required: false,
       default: true
+    },
+
+    showProfileText: {
+      type: Boolean,
+      required: false,
+      default: false
+    },
+
+    increasedSize: {
+      type: Boolean,
+      required: false,
+      default: false
     }
+  },
+
+  mounted() {
+    this.userStore.getUser()
   },
 
   methods: {
@@ -54,36 +60,9 @@ export default defineComponent({
 
       if (this.clickCount > 25) {
         this.clickCount = 0;
-        this.user.avatar_url = this.defaultImg;
+        this.userStore.user.avatar_url = this.defaultImg;
       }
     },
-
-    /**
-     * Asynchronous to get an authorised users discord details from Flask.
-     */
-    async getUser() {
-      try {
-        // if authed, get the user's details and add them to the user object.
-        const response = await axios.get("/api/users/me", {withCredentials: true})
-        this.user = response.data;
-      } catch (error: any) {
-
-        let http_status = error.response?.status;
-
-        // check if the user is unauthorised, if so redirect them to the login page.
-        if (http_status === 401) {
-          window.location.href = "http://localhost:8080";
-        } else if (http_status === 403) {
-          this.$router.push("banned")
-        } else {
-          console.error('Non-401/403 error:', error);
-        }
-      }
-    }
-  },
-
-  mounted() {
-    this.getUser()
   }
 })
 </script>
@@ -91,21 +70,31 @@ export default defineComponent({
 <template>
   <div class="tag">
     <img
-        @click="spinAvatar"
+        @click="spinAvatar()"
         :style="`transform: rotate(${rotateDeg}deg)`"
-        :src="user.avatar_url || defaultImg"
+        :src="userStore.user.avatar_url || defaultImg"
         alt="Your discord profile picture"/>
-    <h1>{{title}}<span v-if="showName" class="name">{{" " + user.username}}</span>{{end}}</h1>
+    <div class="header">
+      <h1 v-if="increasedSize" class="increase">{{title}}<span v-if="showName" class="red">{{" " + userStore.user.username}}</span>{{end}}</h1>
+      <h1 v-else>{{title}}<span v-if="showName" class="red">{{" " + userStore.user.username}}</span>{{end}}</h1>
+      <p v-show="showProfileText">Here’s your profile, you can use this to view and update your answers, check your recipient info and upload your artwork!</p>
+    </div>
   </div>
 </template>
 
 <style scoped>
 .tag {
   display: flex;
-  justify-content: center;
   align-items: center;
   gap: 2rem;
   padding-bottom: 1rem;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: first baseline;
 }
 
 img {
@@ -122,7 +111,16 @@ h1 {
   font-family: 'Fredoka', sans-serif;
 }
 
-.name {
+.increase {
+  font-size: 4rem;
+}
+
+p {
+  font-size: 1.3rem;
+  color: rgba(255, 242, 219, 0.90);
+}
+
+.red {
   color: #FF7A6F;
 }
 
@@ -134,6 +132,10 @@ h1 {
     align-items: center;
     gap: 2rem;
     padding-bottom: 1rem;
+  }
+
+  .header {
+    flex-direction: column;
   }
 }
 </style>
