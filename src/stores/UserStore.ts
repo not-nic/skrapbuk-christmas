@@ -8,7 +8,7 @@ export const useUserStore = defineStore('userStore', {
         user: {} as Profile,
         partner: {} as Partner,
 
-        revealedCard: true,
+        revealedCard: false,
         showNoPartnerMessage: false,
         noPartnerMessage: "",
 

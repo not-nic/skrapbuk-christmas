@@ -37,7 +37,7 @@ export default defineComponent({
     <div v-if="loading" class="answers">
       <p>loading...</p>
     </div>
-    <div v-else class="answers">
+    <div v-else class="answers" :class="{ 'blur': userStore.revealedCard }">
       <p class="question">Their favourite Game:</p>
       <p class="answer">{{ userStore.partner.answers.game }}</p>
       <p class="question">Their favourite Colour:</p>
@@ -55,6 +55,8 @@ export default defineComponent({
 </template>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Redacted&display=swap');
+
 .partner-answers {
   box-sizing: border-box;
   width: 100%;
@@ -85,6 +87,10 @@ h2 {
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
+}
+
+.blur > p {
+  font-family: 'redacted', sans-serif;
 }
 
 .question {
