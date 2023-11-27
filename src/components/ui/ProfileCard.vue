@@ -1,6 +1,6 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {useUserStore} from "../stores/UserStore.ts";
+import {useUserStore} from "../../stores/UserStore.ts";
 
 export default defineComponent({
   name: "ProfileCard",
@@ -8,6 +8,9 @@ export default defineComponent({
   data() {
     return {
       userStore: useUserStore(),
+      rotateDeg: 0,
+      defaultImg: "../src/assets/gom.webp",
+      clickCount: 0,
     }
   },
 
@@ -30,12 +33,6 @@ export default defineComponent({
       default: true
     },
 
-    showSnowflake: {
-      type: Boolean,
-      required: false,
-      default: false
-    },
-
     showProfileText: {
       type: Boolean,
       required: false,
@@ -51,6 +48,21 @@ export default defineComponent({
 
   mounted() {
     this.userStore.getUser()
+  },
+
+  methods: {
+    /**
+     * Easter egg function to spin the users avatar when clicked.
+     */
+    spinAvatar() {
+      this.rotateDeg += 360;
+      this.clickCount += 1;
+
+      if (this.clickCount > 25) {
+        this.clickCount = 0;
+        this.userStore.user.avatar_url = this.defaultImg;
+      }
+    },
   }
 })
 </script>
@@ -58,23 +70,14 @@ export default defineComponent({
 <template>
   <div class="tag">
     <img
-        @click="userStore.spinAvatar()"
-        :style="`transform: rotate(${userStore.rotateDeg}deg)`"
-        :src="userStore.user.avatar_url || userStore.defaultImg"
+        @click="spinAvatar()"
+        :style="`transform: rotate(${rotateDeg}deg)`"
+        :src="userStore.user.avatar_url || defaultImg"
         alt="Your discord profile picture"/>
     <div class="header">
       <h1 v-if="increasedSize" class="increase">{{title}}<span v-if="showName" class="red">{{" " + userStore.user.username}}</span>{{end}}</h1>
       <h1 v-else>{{title}}<span v-if="showName" class="red">{{" " + userStore.user.username}}</span>{{end}}</h1>
       <p v-show="showProfileText">Here’s your profile, you can use this to view and update your answers, check your recipient info and upload your artwork!</p>
-      <div v-show="showSnowflake" class="snowflake-container">
-        <p>
-            ID: <span
-            @mouseover="userStore.showCopy = true"
-            @mouseout="userStore.showCopy = false"
-            @click="userStore.copySnowflake(userStore.user.snowflake)"
-            class="red copy">{{userStore.user.snowflake}}</span>
-        </p>
-      </div>
     </div>
   </div>
 </template>
@@ -119,22 +122,6 @@ p {
 
 .red {
   color: #FF7A6F;
-}
-
-.snowflake-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-}
-
-.copy {
-  opacity: 0.6;
-  cursor: pointer;
-}
-
-.copy:hover {
-  opacity: 1;
 }
 
 @media screen and (max-width: 600px) {

@@ -1,9 +1,9 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {useUserStore} from "../stores/UserStore.ts";
+import {useUserStore} from "../../../stores/UserStore.ts";
 
 export default defineComponent({
-  name: "PartnerCard",
+  name: "PartnerRevealCard",
 
   data() {
     return {

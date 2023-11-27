@@ -1,10 +1,10 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import Grid from "../components/Grid.vue";
-import SignupStage from "../components/SignupStage.vue";
-import ProfileCard from "../components/ProfileCard.vue";
+import Grid from "../components/ui/Grid.vue";
+import SignupStage from "../components/signup/SignupStage.vue";
+import ProfileCard from "../components/ui/ProfileCard.vue";
 import axios from "axios";
-import Logout from "../components/Logout.vue";
+import Logout from "../components/ui/Logout.vue";
 import {Answers} from "../ts/Answers.ts";
 
 export default defineComponent({
@@ -30,6 +30,7 @@ export default defineComponent({
         {question: "Amazing! What is your favourite food to eat?"},
         {question: "Okay last one! What are some of your hobbies and interests?"}
       ],
+
       answers,
       answersSubmitted: false,
       currentQuestionIndex: 0,
@@ -58,7 +59,7 @@ export default defineComponent({
         this.showErrorMessage = true;
       }
       else {
-        // questions passed checks, increment question index and take user to next question.
+        // answer passed checks, increment question index and take user to next question.
         this.currentQuestionIndex++;
       }
     },

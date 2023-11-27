@@ -1,17 +1,16 @@
 <script lang="ts">
 import axios from "axios";
 import {defineComponent} from "vue";
-import Grid from "../components/Grid.vue";
-import Logout from "../components/Logout.vue";
-import ProfileCard from "../components/ProfileCard.vue";
+import Grid from "../components/ui/Grid.vue";
+import Logout from "../components/ui/Logout.vue";
+import ProfileCard from "../components/ui/ProfileCard.vue";
 import {useUserStore} from "../stores/UserStore.ts";
-import UserOptions from "../components/UserOptions.vue";
-import AdminOptions from "../components/AdminOptions.vue";
-import PartnerCard from "../components/PartnerCard.vue";
-import PartnerAnswers from "../components/PartnerAnswers.vue";
+import UserMenuElements from "../components/ui/UserMenuElements.vue";
+import AdminMenuElements from "../components/ui/AdminMenuElements.vue";
+import PartnerProfile from "../components/profile/partner/PartnerProfile.vue";
 
 export default defineComponent({
-  components: {PartnerAnswers, PartnerCard, AdminOptions, UserOptions, ProfileCard, Logout, Grid},
+  components: {UserMenuElements, AdminMenuElements, PartnerProfile, ProfileCard, Logout, Grid},
   data() {
     return {
       countdown: "",
@@ -20,20 +19,7 @@ export default defineComponent({
     }
   },
 
-  mounted() {
-    this.fetchCountdown()
-  },
-
   methods: {
-    async fetchCountdown() {
-      try {
-        const response = await axios.get("/api/event/countdown", {withCredentials: true});
-        this.countdown = response.data.countdown;
-      } catch (error) {
-        console.error(error);
-      }
-    },
-
     // changeImage(event: Event) {
     //   const target = event.target as HTMLInputElement;
     //
@@ -77,13 +63,12 @@ export default defineComponent({
         <ProfileCard title="" end="'s profile!" increased-size show-profile-text></ProfileCard>
         <div class="content-container">
           <div class="nav">
-            <user-options></user-options>
-            <admin-options></admin-options>
+            <user-menu-elements></user-menu-elements>
+            <admin-menu-elements></admin-menu-elements>
           </div>
-          <div class="content">
-            <PartnerCard></PartnerCard>
-            <PartnerAnswers></PartnerAnswers>
-          </div>
+          <partner-profile v-if="userStore.selectedMenuItem === 'partner'"></partner-profile>
+          <p v-if="userStore.selectedMenuItem === 'answers'">Answers Content</p>
+          <p v-if="userStore.selectedMenuItem === 'upload'">Upload content</p>
         </div>
       </div>
     </div>
@@ -124,13 +109,6 @@ export default defineComponent({
   width: 100%;
 }
 
-.content {
-  flex: 1;
-  display: flex;
-  flex-direction: row;
-  gap: 1rem;
-}
-
 .nav {
   min-width: 270px;
   gap: 2rem;
@@ -146,12 +124,6 @@ export default defineComponent({
     flex-direction: column;
     gap: 1rem;
     width: 100%;
-  }
-
-  .content {
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
   }
 }
 </style>

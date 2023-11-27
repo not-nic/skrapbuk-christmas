@@ -1,10 +1,10 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import Grid from "../components/Grid.vue";
-import SignupStage from "../components/SignupStage.vue";
-import ProfileCard from "../components/ProfileCard.vue";
+import Grid from "../components/ui/Grid.vue";
+import SignupStage from "../components/signup/SignupStage.vue";
+import ProfileCard from "../components/ui/ProfileCard.vue";
 import axios from "axios";
-import Logout from "../components/Logout.vue";
+import Logout from "../components/ui/Logout.vue";
 
 export default defineComponent({
   name: "Join",

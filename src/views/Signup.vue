@@ -1,9 +1,9 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import SignupStage from "../components/SignupStage.vue";
-import Grid from "../components/Grid.vue";
-import ProfileCard from "../components/ProfileCard.vue";
-import Logout from "../components/Logout.vue";
+import SignupStage from "../components/signup/SignupStage.vue";
+import Grid from "../components/ui/Grid.vue";
+import ProfileCard from "../components/ui/ProfileCard.vue";
+import Logout from "../components/ui/Logout.vue";
 
 export default defineComponent({
   name: "Signup",
