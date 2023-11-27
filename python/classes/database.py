@@ -2,6 +2,7 @@ import random, string
 
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 from flask import jsonify
 database = SQLAlchemy()
 
@@ -20,8 +21,16 @@ class Database:
         # create user table on flask startup.
 
     def create_all(self):
+        """
+        Create all database tables and add partner foreign key on startup.
+        """
         with self.app.app_context():
             self.db.create_all()
+
+            # Add foreign key constraint
+            alter_table_sql = text('ALTER TABLE user ADD CONSTRAINT fk_user_partner FOREIGN KEY (partner) REFERENCES user(snowflake);')
+            self.db.session.execute(alter_table_sql)
+            self.db.session.commit()
 
     def get_session(self):
         """

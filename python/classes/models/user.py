@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Boolean, Integer, String, ForeignKey
+from sqlalchemy import Column, Boolean, Integer, String, Index
 from python.classes.database import database
 
 class User(database.Model):
@@ -6,10 +6,12 @@ class User(database.Model):
     snowflake = Column(String(255), index=True)
     avatar_url = Column(String(255))
     username = Column(String(255))
-    partner = Column(String(255), ForeignKey('user.snowflake'), nullable=True, default=None)
+    partner = Column(String(255), nullable=True, default=None)
     in_server = Column(Boolean)
     is_admin = Column(Boolean)
     is_banned = Column(Boolean, default=False)
+
+    Index('idx_snowflake', 'snowflake')
 
     def __init__(self, snowflake, avatar_url, username, in_server, is_admin):
         self.snowflake = snowflake
