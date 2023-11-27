@@ -8,30 +8,14 @@ export const useUserStore = defineStore('userStore', {
         user: {} as Profile,
         partner: {} as Partner,
 
-        rotateDeg: 0,
-        defaultImg: "../src/assets/gom.webp",
-        clickCount: 0,
-        showCopy: false,
-
         revealedCard: true,
-        eventStarted: true,
         showNoPartnerMessage: false,
+        noPartnerMessage: "",
+
+        selectedMenuItem: "partner"
     }),
 
     actions: {
-        /**
-         * Easter egg function to spin the users avatar when clicked.
-         */
-        spinAvatar() {
-            this.rotateDeg += 360;
-            this.clickCount += 1;
-
-            if (this.clickCount > 25) {
-                this.clickCount = 0;
-                this.user.avatar_url = this.defaultImg;
-            }
-        },
-
         /**
          * Custom error handler for backend responses, uses a switch case on known responses such as 401 or 403.
          * @param error {any} - Axios error object
@@ -91,22 +75,10 @@ export const useUserStore = defineStore('userStore', {
             } catch (error: any) {
                 await this.errorHandler(error, {
                     customErrorHandler: () => {
-                        this.showNoPartnerMessage = true
+                        this.noPartnerMessage = `${error.response.data.error}`;
+                        this.showNoPartnerMessage = true;
                     }
                 })
-            }
-         },
-
-        /**
-         * Allow a user to copy their own discord snowflake to clipboard.
-         * @param snowflake {number} - discord snowflake to copy.
-         */
-        async copySnowflake(snowflake: number) {
-            try {
-                await navigator.clipboard.writeText(snowflake.toString());
-                console.log("Copied Snowflake");
-            } catch (e) {
-                console.error("Cannot copy", e)
             }
         },
 
@@ -121,6 +93,14 @@ export const useUserStore = defineStore('userStore', {
             } else {
                 this.revealedCard = false;
             }
+        },
+
+        /**
+         * function to change the current selected menu item.
+         * @param item {string} menu item to be switched to.
+         */
+        selectMenuItem(item: string) {
+            this.selectedMenuItem = item;
         }
     }
 })
