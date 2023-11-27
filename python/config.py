@@ -138,7 +138,7 @@ class Config:
                     message_type="INFO"
                 )
 
-                return jsonify({ "error" : f"User ({snowflake}) does not have a partner" }), 400
+                return jsonify({ "error" : f"Woah {discord.fetch_user().username}, its not time to see who your recipient is." }), 400
 
         return wrapper
 
