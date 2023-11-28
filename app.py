@@ -1,5 +1,5 @@
 import os
-from flask import Flask, redirect, request, jsonify
+from flask import Flask, redirect, request, jsonify, session
 from flask_discord import DiscordOAuth2Session, Unauthorized, AccessDenied
 from python.classes.database import Database
 from python.classes.logging import Logging
@@ -39,6 +39,7 @@ def login():
     Returns:
         a discord o-auth session.
     """
+    session['referrer'] = request.referrer
     return discord.create_session(scope=['identify', 'guilds'])
 
 @app.route("/logout")
@@ -56,14 +57,16 @@ def callback():
     """
     Try the discord callback to see if a user has successfully logged in.
     Returns:
-        a redirect to either the signup page or homepage if they cancelled.
+        a redirect to either the previous page they tried to access before logging in, or signup.
     """
-    # TODO: Check the incoming request URL and
-    #  redirect the user to the page they attempted to access last.
     frontend_base_url = app.config.get('FRONTEND_BASE_URL')
+    previous_page = session.get('referrer', frontend_base_url)
     try:
         discord.callback()
-        return redirect(f"{frontend_base_url}/signup")
+        if previous_page == f"{frontend_base_url}/" or previous_page is None:
+            return redirect(f"{frontend_base_url}/signup")
+
+        return redirect(previous_page)
     except AccessDenied:
         return redirect(f"{frontend_base_url}/")
 

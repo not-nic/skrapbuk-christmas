@@ -86,6 +86,7 @@ export default defineComponent({
         const request = await axios.post("/api/users/answers", this.answers, {withCredentials: true})
         console.log(request.data);
         this.answersSubmitted = true;
+        this.$router.push("/join")
       } catch (error: any) {
         console.error(error.response.data.error)
         this.errorMessage = `Sorry! An error has occurred: ${error.response.data.error}`
@@ -136,10 +137,6 @@ export default defineComponent({
       </div>
       <div v-else-if="showErrorMessage" class="question-container">
         <p v-if="showErrorMessage" class="red">{{errorMessage}}</p>
-      </div>
-      <div v-if="answersSubmitted" class="question-container">
-        <p>Thanks for submitting those questions! Ready to move on to the final stage?</p>
-        <button @click="showJoinPage">Let's Go!</button>
       </div>
     </div>
   </div>
