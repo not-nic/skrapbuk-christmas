@@ -114,7 +114,11 @@ def update_answers(snowflake, data) -> bool:
         return True
     return False
 
-def get_answers(snowflake) -> dict:
+@users.route("/answers", methods=['GET'])
+@requires_authorization
+@config.created_answers
+@config.is_banned
+def get_answers(snowflake=None) -> dict:
     """
     Get answers from the database based on snowflake.
     (used within '/partner' endpoint to get partner answers)
@@ -122,7 +126,12 @@ def get_answers(snowflake) -> dict:
     Returns:
         (dict/json) object of users answers.
     """
-    user_answers = Answers.query.filter_by(user_snowflake=snowflake).first()
+    if request.method == 'GET':
+        user_snowflake = discord.fetch_user().id
+    else:
+        user_snowflake = snowflake
+
+    user_answers = Answers.query.filter_by(user_snowflake=user_snowflake).first()
     if user_answers:
         answers_json = {
             'game': user_answers.fav_game,
