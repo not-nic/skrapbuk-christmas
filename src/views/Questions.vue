@@ -203,7 +203,7 @@ input {
   color: #2f2f2f;
   background-color: #FFF6E7;
   transition: border 0.1s;
-  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.10)
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.10);
 }
 
 input:focus {

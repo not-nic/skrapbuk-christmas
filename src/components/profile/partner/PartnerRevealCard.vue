@@ -8,7 +8,8 @@ export default defineComponent({
   data() {
     return {
       userStore: useUserStore(),
-      loading: true
+      loading: true,
+      defaultImage: '../src/assets/gom.webp'
     }
   },
 
@@ -74,7 +75,7 @@ export default defineComponent({
       <p>Loading...</p>
     </div>
     <div v-else class="profile-info">
-      <img class="avatar" :src="details ? details.avatar_url : userStore.defaultImg" alt="recipient discord icon"/>
+      <img class="avatar" :src="details ? details.avatar_url : defaultImage" alt="recipient discord icon"/>
       <h1>{{ details ? details.username : 'Unknown' }}</h1>
       <p v-if="details"> Member Since: <span class="red">{{ snowflakeToTimestamp(details.snowflake) }}</span></p>
     </div>
