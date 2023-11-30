@@ -1,5 +1,5 @@
 <script lang="ts">
-import {defineComponent} from 'vue'
+import {capitalize, defineComponent} from 'vue'
 import axios from "axios";
 import {Answers} from "../../../ts/Answers.ts";
 
@@ -12,17 +12,24 @@ export default defineComponent({
       successMessage: "",
       showSuccessMessage: false,
       invalidAnswers: [] as string[],
+
+      showErrorMessage: false,
+      errorMessage: "",
+      loading: true,
     }
   },
 
   methods: {
+    capitalize,
+
     async getAnswers() {
       try {
         const response = await axios.get("/api/users/answers", {withCredentials: true});
         this.answers = response.data;
+        this.loading = false
 
       } catch (error: any) {
-        console.error(error)
+        console.error(error.response.data.error)
       }
     },
 
@@ -59,6 +66,11 @@ export default defineComponent({
       } catch (error: any) {
         console.error(error)
       }
+    },
+
+    isLastItem(index: number): boolean {
+      const keys = Object.keys(this.answers);
+      return index === keys.length - 1;
     }
   },
 
@@ -74,56 +86,26 @@ export default defineComponent({
       <h1>{{ successMessage }}</h1>
     </div>
     <div v-else class="answers">
-      <div class="response">
-        <p class="question">Favourite Game:</p>
-        <textarea
-            class="answer"
-            :class="{ 'has-error': invalidAnswers.includes('game') }"
-            v-model="answers.game">
-        </textarea>
+      <div v-if="loading" class="response">
+        <p>loading...</p>
       </div>
-      <div class="response">
-        <p class="question">Favourite Colour:</p>
-        <textarea
-            class="answer"
-            :class="{ 'has-error': invalidAnswers.includes('colour') }"
-            v-model="answers.colour">
-        </textarea>
-      </div>
-      <div class="response">
-        <p class="question">Favourite Song:</p>
-        <textarea
-            class="answer"
-            :class="{ 'has-error': invalidAnswers.includes('song') }"
-            v-model="answers.song"></textarea>
-      </div>
-      <div class="response">
-        <p class="question">Favourite Film:</p>
-        <textarea
-            class="answer"
-            :class="{ 'has-error': invalidAnswers.includes('film') }"
-            v-model="answers.film">
-        </textarea>
-      </div>
-      <div class="response">
-        <p class="question">Favourite Food:</p>
-        <textarea
-            class="answer"
-            :class="{ 'has-error': invalidAnswers.includes('food') }"
-            v-model="answers.food">
-        </textarea>
-      </div>
-      <div class="response" >
-        <p class="question">Hobbies & Interests:</p>
-        <div class="last">
-          <textarea
+      <div
+          v-else
+          v-for="(answer, key, index) in answers"
+          :key="key"
+          class="response">
+          <label :for="key" class="question">Favourite {{ capitalize(key) }}:</label>
+          <div
+              @click="console.log(answer)"
               class="answer"
-              :class="{ 'has-error': invalidAnswers.includes('hobby') }"
-              spellcheck="true"
-              v-model="answers.hobby">
-          </textarea>
-          <button @click="updateAnswers">Update answers!</button>
-        </div>
+              :class="{ 'last': isLastItem(index) }">
+            <textarea
+              :class="{ 'has-error': invalidAnswers.includes(key) }"
+              v-model="answers[key]">
+              :id="key"
+            </textarea>
+            <button v-if="isLastItem(index)" @click="updateAnswers">Update answers!</button>
+          </div>
       </div>
     </div>
   </div>
@@ -155,7 +137,8 @@ h1, h2 {
   padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  justify-content: center;
+  gap: 1rem;
   overflow: auto;
 }
 
@@ -168,13 +151,29 @@ h1, h2 {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+  padding: 0 1rem 0 1rem;
+}
+
+.answer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.last {
+  flex-direction: row;
+  gap: 1rem;
+}
+
+.last > textarea {
+  flex: 1;
 }
 
 .question {
   color: #FFF6E7;
 }
 
-.answer {
+textarea {
   resize: none;
   color: #FFF6E7;
   background-color: #211d48;
@@ -184,26 +183,14 @@ h1, h2 {
   font-family: 'Sniglet', sans-serif;
   height: 1rem;
   overflow: hidden;
-  margin: 0 1rem 0 1rem;
 }
 
-.answer:focus {
+textarea:focus {
   outline: none;
 }
 
-.last {
-  box-sizing: border-box;
-  display: flex;
-  gap: 1rem;
-}
-
-.last > .answer {
-  flex: 1;
-  margin: 0 0 0 1rem;
-}
-
 button {
-  text-align: start;
+  text-align: center;
   font-family: 'Fredoka', sans-serif;
   padding: 0.4em 2em;
   font-size: 1.2rem;
@@ -211,7 +198,6 @@ button {
   border-radius: 6px;
   color: #FFF2DB;
   background-color: #544ab3;
-  margin: 0 1rem 0 0;
 }
 
 button:hover {
@@ -223,27 +209,35 @@ button:hover {
   border: 3px solid #FF7A6F;
 }
 
+label {
+  text-align: start;
+}
+
 @media screen and (max-width: 600px) {
   button {
-    text-align: center;
     margin: 0 0 0 0;
   }
 
-  .last {
-    flex-direction: column;
+  .response {
+    padding: 0 0 0 0;
   }
 
-  .answer {
+  textarea {
     overflow: hidden;
     height: 100%;
   }
 
-  .last > .answer {
-    margin: 0 1rem 0 1rem;
-  }
-
   .answers {
     height: 100%;
+  }
+
+  .last {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .last > textarea {
+    flex: 1;
   }
 }
 </style>
