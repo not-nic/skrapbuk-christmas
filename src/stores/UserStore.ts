@@ -47,6 +47,9 @@ export const useUserStore = defineStore('userStore', {
                         customHandlers.customErrorHandler(error)
                     }
                     break;
+                case 500:
+                    console.error("Uh oh!, a server error, that's no good!")
+                    break;
                 // if no errors are found, log the unhandled error.
                 default: handleDefault();
             }
