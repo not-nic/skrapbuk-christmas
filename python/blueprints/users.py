@@ -118,7 +118,7 @@ def update_answers(snowflake, data) -> bool:
 @requires_authorization
 @config.created_answers
 @config.is_banned
-def get_answers(snowflake=None) -> dict:
+def get_answers(snowflake=None):
     """
     Get answers from the database based on snowflake.
     (used within '/partner' endpoint to get partner answers)
@@ -142,7 +142,11 @@ def get_answers(snowflake=None) -> dict:
             'hobby': user_answers.hobby_interest
         }
         return answers_json
-    return {}
+
+    if request.method == 'GET':
+        return jsonify({"error": "oh no! we couldn't find those answers, have you created them?"}), 400
+    else:
+        return {}
 
 @users.route("/join")
 @requires_authorization
