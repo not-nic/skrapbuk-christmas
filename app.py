@@ -70,9 +70,6 @@ def callback():
         redirect_paths = ["signup", "join", "questions", ""]
         full_redirect_paths = {f"{frontend_base_url}/{path}" for path in redirect_paths}
 
-        print(f"{discord.fetch_user().id}" + f"{previous_page}")
-        print(full_redirect_paths)
-
         if has_joined is not None and previous_page in full_redirect_paths:
             return redirect(f"{frontend_base_url}/profile")
 
