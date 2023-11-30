@@ -1,5 +1,4 @@
 <script lang="ts">
-import axios from "axios";
 import {defineComponent} from "vue";
 import Grid from "../components/ui/Grid.vue";
 import Logout from "../components/ui/Logout.vue";
@@ -8,9 +7,10 @@ import {useUserStore} from "../stores/UserStore.ts";
 import UserMenuElements from "../components/ui/UserMenuElements.vue";
 import AdminMenuElements from "../components/ui/AdminMenuElements.vue";
 import PartnerProfile from "../components/profile/partner/PartnerProfile.vue";
+import AnswersProfile from "../components/profile/answers/AnswersProfile.vue";
 
 export default defineComponent({
-  components: {UserMenuElements, AdminMenuElements, PartnerProfile, ProfileCard, Logout, Grid},
+  components: {AnswersProfile, UserMenuElements, AdminMenuElements, PartnerProfile, ProfileCard, Logout, Grid},
   data() {
     return {
       countdown: "",
@@ -67,7 +67,7 @@ export default defineComponent({
             <admin-menu-elements></admin-menu-elements>
           </div>
           <partner-profile v-if="userStore.selectedMenuItem === 'partner'"></partner-profile>
-          <p v-if="userStore.selectedMenuItem === 'answers'">Answers Content</p>
+          <answers-profile v-if="userStore.selectedMenuItem === 'answers'"></answers-profile>
           <p v-if="userStore.selectedMenuItem === 'upload'">Upload content</p>
         </div>
       </div>

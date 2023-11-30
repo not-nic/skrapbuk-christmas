@@ -35,7 +35,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div v-if="this.userStore.showNoPartnerMessage" class="content">
+  <div v-if="userStore.showNoPartnerMessage" class="content">
     <div class="no-partner">
       <h1>{{ userStore.noPartnerMessage }}</h1>
       <h2>Time left: <span>{{ countdown }}</span></h2>
@@ -59,6 +59,7 @@ h1, h2 {
   color: #FFF2DB;
   font-family: 'Fredoka', sans-serif;
   margin: 0;
+  letter-spacing: 0.1rem;
 }
 
 .no-partner {
