@@ -3,6 +3,7 @@ from flask import Flask, redirect, request, jsonify, session
 from flask_discord import DiscordOAuth2Session, Unauthorized, AccessDenied
 from python.classes.database import Database
 from python.classes.logging import Logging
+from python.classes.models.user import User
 from python.config import Config
 
 app = Flask(__name__)
@@ -21,7 +22,7 @@ database = Database(app)
 discord = DiscordOAuth2Session(app)
 logger = Logging()
 logger.start_processing_thread()
-config = Config('D:/Projects/skrapbuk-christmas/python/config.yml', logger)
+config = Config('python/config.yml', logger)
 
 from python.blueprints import bans
 from python.blueprints import event
@@ -63,6 +64,18 @@ def callback():
     previous_page = session.get('referrer', frontend_base_url)
     try:
         discord.callback()
+
+        has_joined = User.query.filter_by(snowflake=discord.fetch_user().id).first()
+
+        redirect_paths = ["signup", "join", "questions", ""]
+        full_redirect_paths = {f"{frontend_base_url}/{path}" for path in redirect_paths}
+
+        print(f"{discord.fetch_user().id}" + f"{previous_page}")
+        print(full_redirect_paths)
+
+        if has_joined is not None and previous_page in full_redirect_paths:
+            return redirect(f"{frontend_base_url}/profile")
+
         if previous_page == f"{frontend_base_url}/" or previous_page is None:
             return redirect(f"{frontend_base_url}/signup")
 
