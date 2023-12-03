@@ -126,7 +126,7 @@ def get_answers(snowflake=None):
     Returns:
         (dict/json) object of users answers.
     """
-    if request.method == 'GET':
+    if snowflake is None:
         user_snowflake = discord.fetch_user().id
     else:
         user_snowflake = snowflake
@@ -206,7 +206,7 @@ def user_partner():
     """
     snowflake = discord.fetch_user().id
     partner_snowflake = User.query.filter_by(snowflake=snowflake).first().partner
-    partner =  User.query.filter_by(snowflake=partner_snowflake).first()
+    partner = User.query.filter_by(snowflake=partner_snowflake).first()
 
     # return limited information about the partner i.e. discord snowflake, username and avatar url.
     partner_info = {
@@ -217,7 +217,7 @@ def user_partner():
 
     return jsonify({
         "details" : partner_info,
-        "answers" : get_answers(partner_snowflake)
+        "answers" : get_answers(snowflake=partner_snowflake)
     })
 
 @users.route("/upload", methods=['POST'])
