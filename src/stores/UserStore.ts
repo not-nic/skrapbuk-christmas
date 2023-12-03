@@ -39,7 +39,7 @@ export const useUserStore = defineStore('userStore', {
                     break;
                 // 403 is returned from banned users, redirect them to /banned.
                 case 403:
-                    this.$router.push("banned");
+                    window.location.href= "/banned"
                     break;
                 // 400 errors can require different edge cases such, i.e. an error message.
                 case 400:

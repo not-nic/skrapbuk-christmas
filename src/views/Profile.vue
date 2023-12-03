@@ -8,48 +8,19 @@ import UserMenuElements from "../components/ui/UserMenuElements.vue";
 import AdminMenuElements from "../components/ui/AdminMenuElements.vue";
 import PartnerProfile from "../components/profile/partner/PartnerProfile.vue";
 import AnswersProfile from "../components/profile/answers/AnswersProfile.vue";
+import UploadProfile from "../components/profile/upload/UploadProfile.vue";
 
 export default defineComponent({
-  components: {AnswersProfile, UserMenuElements, AdminMenuElements, PartnerProfile, ProfileCard, Logout, Grid},
+  components: {
+    UploadProfile,
+    AnswersProfile, UserMenuElements, AdminMenuElements, PartnerProfile, ProfileCard, Logout, Grid},
+
   data() {
     return {
       countdown: "",
       userStore: useUserStore(),
       image: null as File | null,
     }
-  },
-
-  methods: {
-    // changeImage(event: Event) {
-    //   const target = event.target as HTMLInputElement;
-    //
-    //   if (target.files && target.files.length > 0) {
-    //     this.image = target.files[0];
-    //   } else {
-    //     this.image = null;
-    //   }
-    // },
-    //
-    // async uploadImage() {
-    //   if (this.image) {
-    //     try {
-    //       const formData = new FormData();
-    //       {
-    //         formData.append('image', this.image);
-    //
-    //         const response = await axios.post('/api/users/upload', formData, {
-    //           headers: {
-    //             'Content-Type': 'multipart/form-data',
-    //             withCredentials: true
-    //           }
-    //         });
-    //         console.log(response.data);
-    //       }
-    //     } catch (error: object) {
-    //       console.error('Error uploading file:', error.response.data.error)
-    //     }
-    //   }
-    // }
   }
 })
 </script>
@@ -68,18 +39,11 @@ export default defineComponent({
           </div>
           <partner-profile v-if="userStore.selectedMenuItem === 'partner'"></partner-profile>
           <answers-profile v-if="userStore.selectedMenuItem === 'answers'"></answers-profile>
-          <p v-if="userStore.selectedMenuItem === 'upload'">Upload content</p>
+          <upload-profile v-if="userStore.selectedMenuItem === 'upload'"></upload-profile>
         </div>
       </div>
     </div>
   </div>
-
-<!-- USER IMAGE UPLOAD -->
-<!--  <div class="upload">-->
-<!--    <input type="file" @change="changeImage" ref="image" />-->
-<!--    <button @click="uploadImage" :disabled="!image">Upload Image</button>-->
-<!--  </div>-->
-<!--  <img style="max-width: 500px" src="http://localhost:8080/users/artwork" />-->
 </template>
 
 <style scoped>
