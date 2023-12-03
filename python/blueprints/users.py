@@ -11,6 +11,8 @@ from app import app, database, config, discord, logger
 users = Blueprint('users_blueprint', __name__, url_prefix='/users')
 
 ALLOWED_FORMATS = {"png", "jpg", "jpeg", "gif", "mp3", "mp4"}
+# Define the maximum file size (in bytes) (default 50MB)
+MAX_FILE_SIZE = 50 * 1024 * 1024
 
 @requires_authorization
 def in_server() -> bool:
@@ -126,7 +128,7 @@ def get_answers(snowflake=None):
     Returns:
         (dict/json) object of users answers.
     """
-    if request.method == 'GET':
+    if snowflake is None:
         user_snowflake = discord.fetch_user().id
     else:
         user_snowflake = snowflake
@@ -206,7 +208,7 @@ def user_partner():
     """
     snowflake = discord.fetch_user().id
     partner_snowflake = User.query.filter_by(snowflake=snowflake).first().partner
-    partner =  User.query.filter_by(snowflake=partner_snowflake).first()
+    partner = User.query.filter_by(snowflake=partner_snowflake).first()
 
     # return limited information about the partner i.e. discord snowflake, username and avatar url.
     partner_info = {
@@ -217,7 +219,7 @@ def user_partner():
 
     return jsonify({
         "details" : partner_info,
-        "answers" : get_answers(partner_snowflake)
+        "answers" : get_answers(snowflake=partner_snowflake)
     })
 
 @users.route("/upload", methods=['POST'])
@@ -245,6 +247,13 @@ def upload_artwork():
     if file and accepted_image_format(original_filename):
         user = User.query.filter_by(snowflake=discord.fetch_user().id).first()
 
+        # If a support file format, check the file size in memory.
+        file_size = getattr(file, 'content_length', 0) or len(file.read())
+        file.seek(0)  # Reset the file cursor
+
+        if file_size > MAX_FILE_SIZE:
+            return jsonify({"error": "File size exceeds the maximum allowed size. (max 50MB)"}), 400
+
         # check if the user exists
         if user:
             # get the partner and set a new filename
@@ -255,12 +264,14 @@ def upload_artwork():
             handle_existing_artwork(user, new_filename)
             save_file(file, new_filename)
 
-            return jsonify({"message": "File Uploaded Successfully."}), 200
+            return jsonify({"message": "Artwork Uploaded Successfully."}), 200
 
         return jsonify({"error": "User not found."}), 400
     else:
         extension = original_filename.rsplit(".", 1)[-1]
-        return jsonify({"error": f"'{extension}' is not a valid extension, Only use {ALLOWED_FORMATS}"}), 400
+        allowed_formats_str = ', '.join(ALLOWED_FORMATS)
+        return jsonify({"error": f"Oops! We don't support the '{extension}' file extension. "
+                                 f"the supported file formats are: [{allowed_formats_str.upper()}]"}), 400
 
 def handle_existing_artwork(user, filename):
     """
@@ -325,12 +336,12 @@ def uploaded_file():
         user_artwork = Artwork.query.filter_by(created_by=user.snowflake).first()
 
         if user_artwork:
-            return send_from_directory(app.config['UPLOAD_FOLDER'], user_artwork.image_path)
+            return send_from_directory(app.config['UPLOAD_FOLDER'], user_artwork.image_path), 200
         else:
-            return jsonify({"error": f"User ({snowflake}) has not uploaded artwork."})
+            return jsonify({"error": f"You've not uploaded any artwork yet!"}), 400
 
     else:
-        return jsonify({"error": f"User ({snowflake}) has not joined the event."})
+        return jsonify({"error": f"User ({snowflake}) has not joined the event."}), 400
 
 @users.route("/all", methods=["GET"])
 @requires_authorization
